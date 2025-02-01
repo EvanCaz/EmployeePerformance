@@ -5,5 +5,5 @@
 #unignore what we want to track
 !*.java
 !.gitignore
-
+!*.svg
 !*.jar
