@@ -3,8 +3,8 @@
 - Created by Evan Cazares for use at MWM Design Group
 
 ## 🌟 Highlights
-![Decision Tree for the Program](image.png)
-![Class Overview](image-1.png)
+![Decision Tree](https://github.com/EvanCaz/EmployeePerformance/blob/main/Tree.png?raw=true)
+![Class Overview](https://github.com/EvanCaz/EmployeePerformance/blob/main/Diagram.png?raw=true)
 
 
 ## ℹ️ Overview
