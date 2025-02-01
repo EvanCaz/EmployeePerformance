@@ -2,16 +2,16 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Point2D;
+// import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Graph extends JPanel {
-    private static final int PADDING = 120; // margins
+    private static final int PADDING = 90; // margins
     private int yAxisMin = -25;
-    private int yAxisMax = 40;
+    private int yAxisMax = 25;
     
     private Point hoverPoint = null; // default null cuz nothing is displayed yet
     private String hoverText = null;
@@ -21,11 +21,11 @@ public class Graph extends JPanel {
     private final List<Employee> activeEmployees = new ArrayList<>(); // luist of active employeees to go on the list in main
 
     public Graph() {   // construcot
-        setPreferredSize(new Dimension(800, 600)); // makes the window, subject to change idk what custoemr wants
+        setPreferredSize(new Dimension(800, 800)); // makes the window, subject to change idk what custoemr wants, but i shall make it "stretched" vertically so line graph is more apparent
         addMouseMotionListener(new MouseAdapter() { // lsitenr for hovering mouse
             @Override
             public void mouseMoved(MouseEvent e) {
-                checkHover(e.getX(), e.getY()); // update the state if we need to
+                checkHover(e.getX(), e.getY()); // update the state if we need to, if the mouse is withing the pixel box we draw, checkHover will dispaly
                 repaint(); // and update the graoph, but weird ass name
             }
         });
@@ -41,7 +41,7 @@ public class Graph extends JPanel {
         } else {
             activeEmployees.add(employee);
         }
-        repaint();
+        repaint(); // change the graph again
     }
     
     public void setEmployees(List<Employee> employees) { // refresh and start over, hence the clear, add all, and repaint
@@ -75,7 +75,7 @@ public class Graph extends JPanel {
         for (PointValue pv : dataPoints) { // if it is in the dataPoints, then we display the corresponding employee stuff
             if (Math.abs(pv.point.x - mouseX) <= HOVER_THRESHOLD && Math.abs(pv.point.y - mouseY) <= HOVER_THRESHOLD) { // uses absolute value to check if BOTH x and y are within the threshold
                 hoverPoint = new Point(mouseX, mouseY); // if they are, change the variable to the current point
-                hoverText = String.format("%s: %.1f", pv.employee.getName(), pv.value); // and display
+                hoverText = String.format("%s: %.1f", pv.employee.getName().chars().mapToObj(c -> String.valueOf((char) c)).takeWhile(c -> !c.equals(",")).reduce("", String::concat), pv.value); // and display, googled inline maping so i onyl get the last name
                 break; // stop when u find one
             }
         }
@@ -93,7 +93,7 @@ public class Graph extends JPanel {
         g2.setColor(Color.LIGHT_GRAY); //backround
         g2.fillRect(0, 0, getWidth(), getHeight()); // fill entire rectangle
     
-        drawAxes(g2); // does the axis for me, chatgpt helped here again
+        drawAxes(g2); // draw axis, chatgpt helped here again with this method
     
         
         for (Employee emp : activeEmployees) { // for all employes, draw their stuff
@@ -110,15 +110,15 @@ public class Graph extends JPanel {
             g2.setColor(new Color(255, 255, 225)); // off white ish
             FontMetrics fm = g2.getFontMetrics();
             int textWidth = fm.stringWidth(hoverText) + 10; // get width of the rect text
+            int textAscent = fm.getAscent(); // gets the distance between bottom of lowest character and top of highest character
             int textHeight = fm.getHeight(); // get height of rect text
             g2.fillRect(x, y - textHeight, textWidth, textHeight); // draws the rectangle
             g2.setColor(Color.BLACK); 
             g2.drawRect(x, y - textHeight, textWidth, textHeight);
-            g2.drawString(hoverText, x + 5, y - 5); // hover barely to the right and up,not sure why its -5 
+            g2.drawString(hoverText, x + 5, y - textHeight + (textHeight + textAscent) / 2); // hover barely to the right and up, so its minus the hieght of the box + (the height of the box and hieght of min max characters)/ 2
         }
     }
     
-    // Draw the axes and their labels
     private void drawAxes(Graphics2D g2) {
         g2.setColor(Color.BLACK); // drawn in black
     
@@ -126,15 +126,14 @@ public class Graph extends JPanel {
     
         g2.drawLine(PADDING, getHeight() - PADDING, getWidth() - PADDING, getHeight() - PADDING); // same thing but oppsite
     
-        // Y-axis labels
         for (int y = yAxisMin; y <= yAxisMax; y += 5) { // loop over the axis in 5 increments, maybe this is gonna change idk
-            int yPos = mapY(y); // find pixel postion
+            int yPos = mapY(y); // find pixel postion, play around with this until it lines up, play aroudn with above yAxisMin start point too
             g2.drawString(Integer.toString(y), PADDING - 40, yPos); // draw on LEFT sidfe of y axis
         }
     
         // Xassuming all employees share the same monthly data ordering, as it should be becaus eemployee class uses linked hashmap
         // we use the first active employee’s months if available. Otherwise, use an example.
-        if (!activeEmployees.isEmpty()) { // calcualtes the spread of the months, if there were more id suspect this would work nicely lmao
+        if (!activeEmployees.isEmpty()) { // calcualtes the spread of the months, if there were more id suspect this wouldnt work nicely lmao
             Employee sample = activeEmployees.get(0);
             List<Map.Entry<String, Double>> entries = sample.getMonthlyData().entrySet().stream().collect(Collectors.toList());
             int xStep = (getWidth() - 2 * PADDING) / entries.size(); // getwidth/2 gets the horizontal space, minus padding, and divides by the number of months, so we get space between
@@ -150,25 +149,30 @@ public class Graph extends JPanel {
         int xStep = (getWidth() - 2 * PADDING) / entries.size(); // calculkate step just like above so they are in line
         int prevX = -1, prevY = -1; // for drawing lines, -1 cuz no point at start
     
-        // this is not yet set, although i have the infrastrucutre inplace to do this, each employee just has to get a random color
-        Color empColor = employee.getDisplayColor() != null ? employee.getDisplayColor() : Color.BLUE;
+        Color empColor = employee.getDisplayColor() != null ? employee.getDisplayColor() : Color.BLUE; // default color of blue otherwise its whatevey obj is
         g2.setColor(empColor);
     
         for (int i = 0; i < entries.size(); i++) { 
             double value = entries.get(i).getValue(); // for each entry get the value
-            int x = PADDING + (i * xStep) + (xStep / 2); // calculate again bruh, can be more efficent
-            int y = mapY(value); // convert to pixels
-    
-            dataPoints.add(new PointValue(new Point(x, y), value, employee)); // save for hover
-    
-            g2.fillOval(x - 3, y - 3, 6, 6); // draw it, chose random values until it looked like a point
-    
-            // Draw line from previous point if available.
-            if (prevX != -1) { // if we are pasted the first iteration
-                g2.drawLine(prevX, prevY, x, y); // draw a line, given previous and cur points
+            if(value != -100.05){ // value to indicate the employee did not work in this month
+                int x = PADDING + (i * xStep) + (xStep / 2); // calculate again bruh, can be more efficent
+                int y = mapY(value) - 10; // convert to pixels, play around wiht value because i think the formatting of strings and dots makes the dots appear vertically skewed downward
+        
+                dataPoints.add(new PointValue(new Point(x, y), value, employee)); // save for hover
+        
+                g2.fillOval(x - 3, y - 3, 6, 6); // draw it, chose random values until it looked like a point
+        
+                // Draw line from previous point if available.
+                if (prevX != -1) { // if we are pasted the first iteration
+                    g2.drawLine(prevX, prevY, x, y); // draw a line, given previous and cur points
+                }
+                prevX = x; // rotate
+                prevY = y;
+            } else {
+                prevX = -1;
+                prevY = -1;
             }
-            prevX = x; // rotate
-            prevY = y;
+
         }
     }
     
@@ -185,7 +189,7 @@ public class Graph extends JPanel {
         PointValue(Point point, double value, Employee employee) { // this goes into a list that is dataPoints for hovering
             this.point = point;
             this.value = value;
-            this.employee = employee;
+            this.employee = employee; // might also change this so it contains the color, then when you hover the name is in the same color
         }
     }
 }

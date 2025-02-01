@@ -4,11 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
+// import java.util.stream.Collectors;
 
 public class main {
     public static void main(String[] args) {
-        // Launch file chooser on the Event Dispatch Thread (EDT)
         SwingUtilities.invokeLater(() -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
@@ -140,7 +139,7 @@ public class main {
         JPanel panel = new JPanel(new GridLayout(2, 2)); // this containts the input fields below, kinda backwards
         
         JTextField minField = new JTextField("-25"); // default to these values which are same in graph class, these are the creation of both inut fields
-        JTextField maxField = new JTextField("40");
+        JTextField maxField = new JTextField("25");
         
         panel.add(new JLabel("Y-Axis Minimum:")); // adding labels to the fields and addings corresponding text from a second ago
         panel.add(minField);
