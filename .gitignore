@@ -6,5 +6,4 @@
 !*.java
 !.gitignore
 
-!EmployeePerformance/
-!EmployeePerformance/**
+!*.jar
