@@ -1,0 +1,191 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public class Graph extends JPanel {
+    private static final int PADDING = 120; // margins
+    private int yAxisMin = -25;
+    private int yAxisMax = 40;
+    
+    private Point hoverPoint = null; // default null cuz nothing is displayed yet
+    private String hoverText = null;
+    
+    private final List<PointValue> dataPoints = new ArrayList<>(); // a list of each positon to be made ong arph, 
+    
+    private final List<Employee> activeEmployees = new ArrayList<>(); // luist of active employeees to go on the list in main
+
+    public Graph() {   // construcot
+        setPreferredSize(new Dimension(800, 600)); // makes the window, subject to change idk what custoemr wants
+        addMouseMotionListener(new MouseAdapter() { // lsitenr for hovering mouse
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                checkHover(e.getX(), e.getY()); // update the state if we need to
+                repaint(); // and update the graoph, but weird ass name
+            }
+        });
+    }
+
+    public List<Employee> getActiveEmployees() {
+        return new ArrayList<>(activeEmployees); // for main
+    }
+    
+    public void toggleEmployee(Employee employee) { // pretty straight forward, altering the list basically if we choose from drop down
+        if (activeEmployees.contains(employee)) {
+            activeEmployees.remove(employee);
+        } else {
+            activeEmployees.add(employee);
+        }
+        repaint();
+    }
+    
+    public void setEmployees(List<Employee> employees) { // refresh and start over, hence the clear, add all, and repaint
+        activeEmployees.clear();
+        activeEmployees.addAll(employees);
+        repaint();
+    }
+    
+    public void clearEmployees() { // clear all 
+        activeEmployees.clear();
+        repaint();
+    }
+    
+    public boolean hasAll(List<Employee> allEmployees) {
+        return activeEmployees.containsAll(allEmployees) && (activeEmployees.size() == allEmployees.size()); // check in from enitre list whos active
+    }
+    
+    public void setYAxisRange(int min, int max) { // for chaning when thebutton is pressed
+        if (min >= max) {
+            throw new IllegalArgumentException("Y-axis min must be less than max"); // this is what is caught by main
+        }
+        this.yAxisMin = min;
+        this.yAxisMax = max;
+        repaint();
+    }
+    
+    private void checkHover(int mouseX, int mouseY) {
+        final int HOVER_THRESHOLD = 5; // how clsoe we consider it to be, in pixels, to display data
+        hoverPoint = null;
+        hoverText = null;
+        for (PointValue pv : dataPoints) { // if it is in the dataPoints, then we display the corresponding employee stuff
+            if (Math.abs(pv.point.x - mouseX) <= HOVER_THRESHOLD && Math.abs(pv.point.y - mouseY) <= HOVER_THRESHOLD) { // uses absolute value to check if BOTH x and y are within the threshold
+                hoverPoint = new Point(mouseX, mouseY); // if they are, change the variable to the current point
+                hoverText = String.format("%s: %.1f", pv.employee.getName(), pv.value); // and display
+                break; // stop when u find one
+            }
+        }
+    }
+    
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g); // clr data points before drawing
+
+        dataPoints.clear(); // clear data pojnts so we dont get overlapping and only the ones currently draawn are there
+        
+        Graphics2D g2 = (Graphics2D) g; // set to 2d for more capabliteis
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); // chatgpt helped me with this, makes for a better image
+    
+        g2.setColor(Color.LIGHT_GRAY); //backround
+        g2.fillRect(0, 0, getWidth(), getHeight()); // fill entire rectangle
+    
+        drawAxes(g2); // does the axis for me, chatgpt helped here again
+    
+        
+        for (Employee emp : activeEmployees) { // for all employes, draw their stuff
+            drawEmployeeData(g2, emp);
+        }
+    
+        drawHoverTooltip(g2); // hover tooltip if neded
+    }
+    
+    private void drawHoverTooltip(Graphics2D g2) {
+        if (hoverPoint != null && hoverText != null) { // fi we are hovering
+            int x = hoverPoint.x + 10; // rectanlge size for text
+            int y = hoverPoint.y - 10;
+            g2.setColor(new Color(255, 255, 225)); // off white ish
+            FontMetrics fm = g2.getFontMetrics();
+            int textWidth = fm.stringWidth(hoverText) + 10; // get width of the rect text
+            int textHeight = fm.getHeight(); // get height of rect text
+            g2.fillRect(x, y - textHeight, textWidth, textHeight); // draws the rectangle
+            g2.setColor(Color.BLACK); 
+            g2.drawRect(x, y - textHeight, textWidth, textHeight);
+            g2.drawString(hoverText, x + 5, y - 5); // hover barely to the right and up,not sure why its -5 
+        }
+    }
+    
+    // Draw the axes and their labels
+    private void drawAxes(Graphics2D g2) {
+        g2.setColor(Color.BLACK); // drawn in black
+    
+        g2.drawLine(PADDING, PADDING, PADDING, getHeight() - PADDING); // starts at top left after margin, which is my padding, and ends bottom left minus padding again  
+    
+        g2.drawLine(PADDING, getHeight() - PADDING, getWidth() - PADDING, getHeight() - PADDING); // same thing but oppsite
+    
+        // Y-axis labels
+        for (int y = yAxisMin; y <= yAxisMax; y += 5) { // loop over the axis in 5 increments, maybe this is gonna change idk
+            int yPos = mapY(y); // find pixel postion
+            g2.drawString(Integer.toString(y), PADDING - 40, yPos); // draw on LEFT sidfe of y axis
+        }
+    
+        // Xassuming all employees share the same monthly data ordering, as it should be becaus eemployee class uses linked hashmap
+        // we use the first active employee’s months if available. Otherwise, use an example.
+        if (!activeEmployees.isEmpty()) { // calcualtes the spread of the months, if there were more id suspect this would work nicely lmao
+            Employee sample = activeEmployees.get(0);
+            List<Map.Entry<String, Double>> entries = sample.getMonthlyData().entrySet().stream().collect(Collectors.toList());
+            int xStep = (getWidth() - 2 * PADDING) / entries.size(); // getwidth/2 gets the horizontal space, minus padding, and divides by the number of months, so we get space between
+            for (int i = 0; i < entries.size(); i++) {
+                int xPos = PADDING + (i * xStep) + (xStep / 2);
+                g2.drawString(entries.get(i).getKey(), xPos - 10, getHeight() - PADDING + 20);
+            }  
+        }
+    }
+    
+    private void drawEmployeeData(Graphics2D g2, Employee employee) {
+        List<Map.Entry<String, Double>> entries = employee.getMonthlyData().entrySet().stream().collect(Collectors.toList()); // get the employees specifc numbers to be plotted, chat helped with this one liner
+        int xStep = (getWidth() - 2 * PADDING) / entries.size(); // calculkate step just like above so they are in line
+        int prevX = -1, prevY = -1; // for drawing lines, -1 cuz no point at start
+    
+        // this is not yet set, although i have the infrastrucutre inplace to do this, each employee just has to get a random color
+        Color empColor = employee.getDisplayColor() != null ? employee.getDisplayColor() : Color.BLUE;
+        g2.setColor(empColor);
+    
+        for (int i = 0; i < entries.size(); i++) { 
+            double value = entries.get(i).getValue(); // for each entry get the value
+            int x = PADDING + (i * xStep) + (xStep / 2); // calculate again bruh, can be more efficent
+            int y = mapY(value); // convert to pixels
+    
+            dataPoints.add(new PointValue(new Point(x, y), value, employee)); // save for hover
+    
+            g2.fillOval(x - 3, y - 3, 6, 6); // draw it, chose random values until it looked like a point
+    
+            // Draw line from previous point if available.
+            if (prevX != -1) { // if we are pasted the first iteration
+                g2.drawLine(prevX, prevY, x, y); // draw a line, given previous and cur points
+            }
+            prevX = x; // rotate
+            prevY = y;
+        }
+    }
+    
+    private int mapY(double value) { // covnert to an x cordinate, a data value
+        double scaleY = (getHeight() - 2 * PADDING) / (double) (yAxisMax - yAxisMin); // get the availdible vertial space,  divide by the cur max-min range, and its a doulve cuz decimal
+        return (int) (getHeight() - PADDING - (value - yAxisMin) * scaleY); // get the bottom of the graph. subtract the min y axis to get the y level, and * scalay and turn to int
+    }
+    
+    private static class PointValue { // might need to move in new file
+        Point point;
+        double value;
+        Employee employee;
+    
+        PointValue(Point point, double value, Employee employee) { // this goes into a list that is dataPoints for hovering
+            this.point = point;
+            this.value = value;
+            this.employee = employee;
+        }
+    }
+}
