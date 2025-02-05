@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class Graph extends JPanel {
     private static final int PADDING = 90; // margins
-    private int yAxisMin = -25;
+    private int yAxisMin = -25; // going to change this so it is dynamic, where the min is rounded to the next lowest 5 and max is rounded to next highest five, so the spread of lines is greatest no matter what
     private int yAxisMax = 25;
     
     private Point hoverPoint = null; // default null cuz nothing is displayed yet
@@ -125,9 +125,21 @@ public class Graph extends JPanel {
         g2.drawLine(PADDING, PADDING, PADDING, getHeight() - PADDING); // starts at top left after margin, which is my padding, and ends bottom left minus padding again  
     
         g2.drawLine(PADDING, getHeight() - PADDING, getWidth() - PADDING, getHeight() - PADDING); // same thing but oppsite
-    
+        
+        // g2.drawLine(PADDING, getHeight() / 2, getWidth() - PADDING, getHeight() / 2 ); // draws a lie in the middle, idk why i had it as ifstatement cuz if range changes it wont run
+        
+
         for (int y = yAxisMin; y <= yAxisMax; y += 5) { // loop over the axis in 5 increments, maybe this is gonna change idk
             int yPos = mapY(y); // find pixel postion, play around with this until it lines up, play aroudn with above yAxisMin start point too
+            // boolean hasRun = false;
+            if(0 > yAxisMin && 0 < yAxisMax){
+                int temp = mapY(0);
+                g2.drawLine(PADDING, temp, getWidth() - PADDING, temp); // draws a line where zero is no matter range
+                // if(y == 0 && hasRun == false){ // need this if statement to occur only once in the loop
+                //     hasRun = true;
+                //     g2.drawString("0", PADDING - 40, temp); // draws the zero, only want it to draw if the
+                // }
+            }
             g2.drawString(Integer.toString(y), PADDING - 40, yPos); // draw on LEFT sidfe of y axis
         }
     
@@ -156,8 +168,8 @@ public class Graph extends JPanel {
             double value = entries.get(i).getValue(); // for each entry get the value
             if(value != -100.05){ // value to indicate the employee did not work in this month
                 int x = PADDING + (i * xStep) + (xStep / 2); // calculate again bruh, can be more efficent
-                int y = mapY(value) - 10; // convert to pixels, play around wiht value because i think the formatting of strings and dots makes the dots appear vertically skewed downward
-        
+                int y = mapY(value); // convert to pixels, play around wiht value because i think the formatting of strings and dots makes the dots appear vertically skewed downward
+                // i had a minus ten from above, that was causing everything to be skewed upwards, this fixes that issue, need to change jar
                 dataPoints.add(new PointValue(new Point(x, y), value, employee)); // save for hover
         
                 g2.fillOval(x - 3, y - 3, 6, 6); // draw it, chose random values until it looked like a point

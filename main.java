@@ -60,11 +60,13 @@ public class main {
         
         JButton displayAllButton = new JButton("Display All"); // button defintions for addition control buttons
         JButton clearAllButton = new JButton("Clear All");
+        // JToggleButton toggleExpectedPerformance = new JToggleButton("Expected Performance Off");
     
         controlPanel.add(employeeDropdown); // adding all of these to the flowlayout jpanel
         controlPanel.add(yAxisButton);
         controlPanel.add(displayAllButton);
         controlPanel.add(clearAllButton);
+        // controlPanel.add(toggleExpectedPerformance);
         
         JLabel activeEmployeesLabel = new JLabel("Active Employees: None"); // default selection is none, this is position right below controlPanel
         activeEmployeesLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
@@ -106,6 +108,17 @@ public class main {
             updateLabel.run();
         });
     
+        // toggleExpectedPerformance.addActionListener(e -> {
+        //     if(toggleExpectedPerformance.getText() == "Expected Performance Off"){
+        //         toggleExpectedPerformance.setText("Expected Performance On");
+        //     } else {
+        //         toggleExpectedPerformance.setText("Expected Performance Off");
+        //     }
+        //     // graph.displayExpected(employees); // add a method to display all the expected infromation for each employee, not yet handled in parser or graph
+        //     updateLabel.run();
+        // });
+
+
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true); //swing stuff
