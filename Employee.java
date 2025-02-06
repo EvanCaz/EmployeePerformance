@@ -2,7 +2,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.awt.Color;
 
-public class Employee {
+public class Employee { // TODO: change the strucutre to hold expected values, and change everythign else so it works with a new hashmap, so double is now "List double"
     private final String name;
     private final Map<String, Double> monthlyData;
     private Color displayColor;

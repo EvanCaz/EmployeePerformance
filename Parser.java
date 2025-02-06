@@ -35,7 +35,8 @@ public class Parser {
                     Employee employee = new Employee(name); // new obj
                     for (int monthColumn : monthIndices) {
                         String monthName = line2.split(",")[monthColumn].trim(); // access the array at index in month idices to get the name
-                        int valueIndex = monthColumn; // get the index for the value we want
+                        //TODO: this is where id add expected values as well, so it would capute this and the previous one 
+                        int valueIndex = monthColumn; // get the index for the value we want, 
                         if (valueIndex < dataValues.length) { // if it is in the range, capture it
                             double value = parseValue(dataValues[valueIndex].trim()); // trim and capture at the same index, but in our row
                             employee.setMonthValue(monthName, value); // initlize the object

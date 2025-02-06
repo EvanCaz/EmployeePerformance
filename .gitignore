@@ -9,3 +9,6 @@
 !*.jar
 !*.md
 !*.png
+
+# !Application/
+# !Application/**

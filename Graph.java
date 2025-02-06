@@ -128,19 +128,19 @@ public class Graph extends JPanel {
         
         // g2.drawLine(PADDING, getHeight() / 2, getWidth() - PADDING, getHeight() / 2 ); // draws a lie in the middle, idk why i had it as ifstatement cuz if range changes it wont run
         
+        boolean hasRun = false;
 
         for (int y = yAxisMin; y <= yAxisMax; y += 5) { // loop over the axis in 5 increments, maybe this is gonna change idk
             int yPos = mapY(y); // find pixel postion, play around with this until it lines up, play aroudn with above yAxisMin start point too
-            // boolean hasRun = false;
             if(0 > yAxisMin && 0 < yAxisMax){
-                int temp = mapY(0);
-                g2.drawLine(PADDING, temp, getWidth() - PADDING, temp); // draws a line where zero is no matter range
-                // if(y == 0 && hasRun == false){ // need this if statement to occur only once in the loop
-                //     hasRun = true;
-                //     g2.drawString("0", PADDING - 40, temp); // draws the zero, only want it to draw if the
-                // }
+                int zeroLoc = mapY(0);
+                g2.drawLine(PADDING, zeroLoc, getWidth() - PADDING, zeroLoc); // draws a line where zero is no matter range
+                if(hasRun == false && y != 0){ // need this if statement to occur only once in the loop, and not occur if the range will have zero in it
+                    hasRun = true;
+                    g2.drawString("0", PADDING - 40, zeroLoc); // draws the zero, only want it to draw if the
+                }
             }
-            g2.drawString(Integer.toString(y), PADDING - 40, yPos); // draw on LEFT sidfe of y axis
+            g2.drawString(Integer.toString(y), PADDING - 40, yPos); // draw on LEFT sidfe of y axis, the numbers
         }
     
         // Xassuming all employees share the same monthly data ordering, as it should be becaus eemployee class uses linked hashmap
