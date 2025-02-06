@@ -10,5 +10,6 @@
 !*.md
 !*.png
 
+# !*.zip
 # !Application/
 # !Application/**
