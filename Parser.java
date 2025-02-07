@@ -37,9 +37,12 @@ public class Parser {
                         String monthName = line2.split(",")[monthColumn].trim(); // access the array at index in month idices to get the name
                         //TODO: this is where id add expected values as well, so it would capute this and the previous one 
                         int valueIndex = monthColumn; // get the index for the value we want, 
+                        int exepectedIndex = monthColumn - 1;
                         if (valueIndex < dataValues.length) { // if it is in the range, capture it
                             double value = parseValue(dataValues[valueIndex].trim()); // trim and capture at the same index, but in our row
+                            double expectedValue = parseValue(dataValues[exepectedIndex].trim());
                             employee.setMonthValue(monthName, value); // initlize the object
+                            employee.setExpectedMonthValue(monthName, expectedValue);
                         }
                     }
                     employees.add(employee); // add to the list of obs

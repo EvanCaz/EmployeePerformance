@@ -4,8 +4,9 @@ import java.awt.Color;
 
 public class Employee { // TODO: change the strucutre to hold expected values, and change everythign else so it works with a new hashmap, so double is now "List double"
     private final String name;
-    private final Map<String, Double> monthlyData;
+    private final Map<String, Double[]> monthlyData;
     private Color displayColor;
+    private String org; // this will be set in the parser, access column five and set this variable
 
     public Employee(String name) {
         this.name = name;
@@ -18,10 +19,35 @@ public class Employee { // TODO: change the strucutre to hold expected values, a
     }
     public Color getDisplayColor(){return displayColor;}
 
+    // setter and getter for org varaible
+    public void setOrg(String x){
+        this.org = x;
+    }
+
+    public String getOrg(){
+        return org;
+    }
     // setter monthly values
     public void setMonthValue(String monthName, double value) {
-        
-        monthlyData.put(capitalize(monthName.toLowerCase()), value); // might need to capitlize the first letter, whcih i can do below
+        monthName = capitalize(monthName.toLowerCase());
+        Double[] values = monthlyData.get(monthName);
+        if (values == null){ // if the values are null meaning doesnt exist
+            values = new Double[2]; // new array because it doesnt exists
+        }
+        // if they already exist
+        values[0] = value; // chane the first one
+        monthlyData.put(monthName, values); // add it to linkedhasmap
+    }
+
+    public void setExpectedMonthValue(String monthName, double value){
+        monthName = capitalize(monthName.toLowerCase());
+        Double values[] = monthlyData.get(monthName);
+        if(values == null){
+            values = new Double[2];
+        }
+        values[1] = value;
+        monthlyData.put(monthName, values); // add it to linkedhasmap
+
     }
 
     // getter for name
@@ -30,9 +56,11 @@ public class Employee { // TODO: change the strucutre to hold expected values, a
     }
 
     // getter for monthly data
-    public Map<String, Double> getMonthlyData() {
+    public Map<String, Double[]> getMonthlyData() {
         return monthlyData;
     }
+
+    
 
     // public void printMonthlyData() { // testing
     //     System.out.println("\nEmployee: " + name);

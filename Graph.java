@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.AbstractMap;
 // import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,8 @@ public class Graph extends JPanel {
     private Point hoverPoint = null; // default null cuz nothing is displayed yet
     private String hoverText = null;
     
+    private boolean showExpected = false; // flag for overlay
+
     private final List<PointValue> dataPoints = new ArrayList<>(); // a list of each positon to be made ong arph, 
     
     private final List<Employee> activeEmployees = new ArrayList<>(); // luist of active employeees to go on the list in main
@@ -29,6 +32,11 @@ public class Graph extends JPanel {
                 repaint(); // and update the graoph, but weird ass name
             }
         });
+    }
+
+    public void setShowExpected(boolean showExpected) { // can be accesed by main so overlay of expected can be printed
+        this.showExpected = showExpected;
+        repaint();
     }
 
     public List<Employee> getActiveEmployees() {
@@ -83,25 +91,29 @@ public class Graph extends JPanel {
     
     @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g); // clr data points before drawing
+        super.paintComponent(g);
+        dataPoints.clear();
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        dataPoints.clear(); // clear data pojnts so we dont get overlapping and only the ones currently draawn are there
-        
-        Graphics2D g2 = (Graphics2D) g; // set to 2d for more capabliteis
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); // chatgpt helped me with this, makes for a better image
-    
-        g2.setColor(Color.LIGHT_GRAY); //backround
-        g2.fillRect(0, 0, getWidth(), getHeight()); // fill entire rectangle
-    
-        drawAxes(g2); // draw axis, chatgpt helped here again with this method
-    
-        
-        for (Employee emp : activeEmployees) { // for all employes, draw their stuff
+        g2.setColor(Color.LIGHT_GRAY);
+        g2.fillRect(0, 0, getWidth(), getHeight());
+
+        drawAxes(g2);
+
+        // draw actual performance data for each employee
+        for (Employee emp : activeEmployees) {
             drawEmployeeData(g2, emp);
         }
-    
-        drawHoverTooltip(g2); // hover tooltip if neded
+        
+        // if flag overlay the expected performance stuff
+        if (showExpected) {
+            displayExpected(g2, true);
+        }
+        
+        drawHoverTooltip(g2);
     }
+
     
     private void drawHoverTooltip(Graphics2D g2) {
         if (hoverPoint != null && hoverText != null) { // fi we are hovering
@@ -147,7 +159,7 @@ public class Graph extends JPanel {
         // we use the first active employee’s months if available. Otherwise, use an example.
         if (!activeEmployees.isEmpty()) { // calcualtes the spread of the months, if there were more id suspect this wouldnt work nicely lmao
             Employee sample = activeEmployees.get(0);
-            List<Map.Entry<String, Double>> entries = sample.getMonthlyData().entrySet().stream().collect(Collectors.toList());
+            List<Map.Entry<String, Double>> entries = sample.getMonthlyData().entrySet().stream().map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), entry.getValue()[0])).collect(Collectors.toList()); // chat helped with this for getting only the fist index
             int xStep = (getWidth() - 2 * PADDING) / entries.size(); // getwidth/2 gets the horizontal space, minus padding, and divides by the number of months, so we get space between
             for (int i = 0; i < entries.size(); i++) {
                 int xPos = PADDING + (i * xStep) + (xStep / 2);
@@ -155,9 +167,58 @@ public class Graph extends JPanel {
             }  
         }
     }
+
+    private void displayExpected(Graphics2D g2, boolean flag) { 
+        // this works exaclty like disaplayemployeedata, but because i want this to be seperably toggleable, i have to caputre current state and save it to be repainted
+        if (flag) {
+            Stroke originalStroke = g2.getStroke(); // save original stroke, which is basically currenlty what is dispalyed
+            Stroke dashed = new BasicStroke(1.5f,
+                                            BasicStroke.CAP_BUTT,
+                                            BasicStroke.JOIN_MITER,
+                                            10.0f,
+                                            new float[]{10.0f},
+                                            0.0f);
+            g2.setStroke(dashed); // dashed pattern from chatgpt
+            g2.setColor(Color.darkGray); // all expected numerics are the same color
+
+            // For each active employee, draw their expected performance.
+            for (Employee employee : activeEmployees) {
+                // Get the expected performance values (index 1).
+                List<Map.Entry<String, Double>> entries = employee.getMonthlyData().entrySet().stream().map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), entry.getValue()[1])).collect(Collectors.toList());
+                int xStep = (getWidth() - 2 * PADDING) / entries.size();
+                int prevX = -1;
+                int prevY = -1;
+
+                for (int i = 0; i < entries.size(); i++) {
+                    double value = entries.get(i).getValue();
+                    if (value != -100.05) {
+                        int x = PADDING + (i * xStep) + (xStep / 2);
+                        int y = mapY(value);
+
+                        dataPoints.add(new PointValue(new Point(x, y), value, employee)); // for hovering
+
+                        // draw the circle just as we do with actual performance
+                        g2.fillOval(x - 3, y - 3, 6, 6);
+                        if (prevX != -1) { // past first iteration or last value was not empty
+                            g2.drawLine(prevX, prevY, x, y);
+                        }
+                        prevX = x;
+                        prevY = y;
+                    } else {
+                        prevX = -1;
+                        prevY = -1;
+                    }
+                }
+            }
+            // set the stroke wiht the data from method below after we draw the expected data
+            g2.setStroke(originalStroke);
+        }
+    }
+
     
     private void drawEmployeeData(Graphics2D g2, Employee employee) {
-        List<Map.Entry<String, Double>> entries = employee.getMonthlyData().entrySet().stream().collect(Collectors.toList()); // get the employees specifc numbers to be plotted, chat helped with this one liner
+        List<Map.Entry<String, Double>> entries = employee.getMonthlyData().entrySet().stream().map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), entry.getValue()[0])).collect(Collectors.toList()); // chat helped with this, gets the first index in the list
+;       // get the employees specifc numbers to be plotted, chat helped with this one liner
         int xStep = (getWidth() - 2 * PADDING) / entries.size(); // calculkate step just like above so they are in line
         int prevX = -1, prevY = -1; // for drawing lines, -1 cuz no point at start
     

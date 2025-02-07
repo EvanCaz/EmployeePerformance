@@ -12,9 +12,11 @@ Encompassed in 1.0, I created a Java Swing App that visualizes employee metrics 
 
 1.1 will have expected performance plotted with a switch to turn on and off, as well as potential issues/edge cases I have thought off handled correctly. This includes the way the name is parsed from the file. Some individuals may not have a last name, or their name may be entered into the excel file differently. Right now, a comma is used to seperate the first and last name, but in a csv file a comma dictates a row. From the start, the data of interest in the excel file is one column over from the corresponding month, but because of the comma in the name, the parser does not need the additional + 1 column count. This could cause an issue. Additionaly, more control flow options will be added, such as choose a new file without closing. 
 
+Will also add the ability to display certain groups. I know employees are classfied as a group, so another dropdown menu, or control function, will be used to display certain groups. In the csv file, each employee, in the fifth column, contains their group. This can be added as an attribute.
+
 ## 🚀 Usage instructions
 
-Currently a jar file, this program requires the user to have a Java Runtime Enviroment install locally and is reachable. The program is straight forward, with no discernable ambiguity in what each function does. Eventually, when I figure it out, I will create a .exe file for simple use that has the JRE bundled.
+Is now a .exe file located in published section on github. Folder includes the .exe as well as the jre folder, all compressed togethor.
 
 ## 🌟 Highlights
 
