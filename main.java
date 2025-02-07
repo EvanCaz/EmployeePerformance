@@ -1,16 +1,17 @@
 import javax.swing.*;
 import javax.swing.border.Border;
-import java.util.Stack;
+import java.util.Set;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 // import java.util.stream.Collectors;
 
 public class main {
 
-    private static Stack<Integer> prevEmpindex = new Stack<>();
+    private static Set<Integer> prevEmpindex = new HashSet();
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             JFileChooser fileChooser = new JFileChooser();
@@ -92,15 +93,15 @@ public class main {
         employeeDropdown.addActionListener(e -> { // need to fix so then when selecting same on it clears
             int selectedIndex = employeeDropdown.getSelectedIndex();
             Employee selectedEmployee = employees.get(selectedIndex);
-            if(prevEmpindex.isEmpty() == true || prevEmpindex.peek() != selectedIndex){
+            if(prevEmpindex.isEmpty() == true || !prevEmpindex.contains(selectedIndex)){
                 graph.toggleEmployee(selectedEmployee);
                 updateLabel.run();
-                prevEmpindex.push(selectedIndex);
+                prevEmpindex.add(selectedIndex);
                 employeeDropdown.setSelectedIndex(selectedIndex);
-            } else if(prevEmpindex.peek() == selectedIndex){
+            } else if(prevEmpindex.contains(selectedIndex)){
                 graph.toggleEmployee(selectedEmployee);
                 updateLabel.run();
-                prevEmpindex.pop();
+                prevEmpindex.remove(selectedIndex);
                 employeeDropdown.setSelectedIndex(-1);
             } 
 
