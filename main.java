@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.border.Border;
+
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -46,8 +48,10 @@ public class main {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // close when i close it
         frame.setLayout(new BorderLayout()); // how I plane to arrange everything inside
     
-        JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10)); // area for all the buttons and drop down, "controlpanel" is created and flowlayout means the stuff is in a row
-        controlPanel.setBackground(Color.LIGHT_GRAY);
+        JPanel controlPanelNorth = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10)); // area for all the buttons and drop down, "controlPanelNorth" is created and flowlayout means the stuff is in a row
+        JPanel controlPanelSouth = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10)); // for extra buttons
+        controlPanelNorth.setBackground(Color.LIGHT_GRAY);
+        controlPanelSouth.setBackground(Color.LIGHT_GRAY);
         
         JComboBox<String> employeeDropdown = new JComboBox<>( // jcombo is the swing drop down, 
             employees.stream()
@@ -62,13 +66,13 @@ public class main {
         JButton clearAllButton = new JButton("Clear All");
         JToggleButton toggleExpectedPerformance = new JToggleButton("Expected Performance Off");
     
-        controlPanel.add(employeeDropdown); // adding all of these to the flowlayout jpanel
-        controlPanel.add(yAxisButton);
-        controlPanel.add(displayAllButton);
-        controlPanel.add(clearAllButton);
-        controlPanel.add(toggleExpectedPerformance);
+        controlPanelNorth.add(employeeDropdown); // adding all of these to the flowlayout jpanel
+        controlPanelNorth.add(yAxisButton);
+        controlPanelNorth.add(displayAllButton);
+        controlPanelNorth.add(clearAllButton);
+        controlPanelSouth.add(toggleExpectedPerformance);
         
-        JLabel activeEmployeesLabel = new JLabel("Active Employees: None"); // default selection is none, this is position right below controlPanel
+        JLabel activeEmployeesLabel = new JLabel("Active Employees: None"); // default selection is none, this is position right below controlPanelNorth
         activeEmployeesLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
         activeEmployeesLabel.setBackground(Color.LIGHT_GRAY);
         Graph graph = new Graph(); // creating graph object, constructor requires nothing but it used to and forhot to change it earlier
@@ -78,9 +82,9 @@ public class main {
         graphContainer.add(graph, BorderLayout.CENTER);
         graphContainer.setBackground(Color.LIGHT_GRAY); 
     
-        frame.add(controlPanel, BorderLayout.NORTH); // the controlPanel is added to the top of this new jpanel
+        frame.add(controlPanelNorth, BorderLayout.NORTH); // the controlPanelNorth is added to the top of this new jpanel
         frame.add(graphContainer, BorderLayout.CENTER); // the graph is added to the center, but realisticlay the everything else besides north
-    
+        frame.add(controlPanelSouth, BorderLayout.SOUTH);
         Runnable updateLabel = () -> updateActiveEmployeesLabel(activeEmployeesLabel, graph); // chatgpt helped, idk what runnable is but this is a listener to update active employees
     
         // listenrs

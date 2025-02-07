@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class Graph extends JPanel {
     private static final int PADDING = 90; // margins
-    private int yAxisMin = -25; // going to change this so it is dynamic, where the min is rounded to the next lowest 5 and max is rounded to next highest five, so the spread of lines is greatest no matter what
+    private int yAxisMin = -15; // going to change this so it is dynamic, where the min is rounded to the next lowest 5 and max is rounded to next highest five, so the spread of lines is greatest no matter what
     private int yAxisMax = 25;
     
     private Point hoverPoint = null; // default null cuz nothing is displayed yet
@@ -52,7 +52,7 @@ public class Graph extends JPanel {
         repaint(); // change the graph again
     }
     
-    public void setEmployees(List<Employee> employees) { // refresh and start over, hence the clear, add all, and repaint
+    public void setEmployees(List<Employee> employees) { // refresh and start over, hence the clear, add all, and repaint, so display all
         activeEmployees.clear();
         activeEmployees.addAll(employees);
         repaint();
@@ -67,7 +67,7 @@ public class Graph extends JPanel {
         return activeEmployees.containsAll(allEmployees) && (activeEmployees.size() == allEmployees.size()); // check in from enitre list whos active
     }
     
-    public void setYAxisRange(int min, int max) { // for chaning when thebutton is pressed
+    public void setYAxisRange(int min, int max) { // for chaning when thebutton is pressed, will be change to "checkRange" that is called when any button that alters activeEmployees so this can check if the range is appropirate to display everything
         if (min >= max) {
             throw new IllegalArgumentException("Y-axis min must be less than max"); // this is what is caught by main
         }
@@ -141,7 +141,49 @@ public class Graph extends JPanel {
         // g2.drawLine(PADDING, getHeight() / 2, getWidth() - PADDING, getHeight() / 2 ); // draws a lie in the middle, idk why i had it as ifstatement cuz if range changes it wont run
         
         boolean hasRun = false;
-
+        double curMax = Double.NEGATIVE_INFINITY;
+        double curMin = Double.POSITIVE_INFINITY;
+        
+        for (Employee emp : activeEmployees) {
+            for (Double[] values : emp.getMonthlyData().values()) {
+                if (showExpected) { // so the range change son if show expected is toggled
+                    // Process both indices in the array.
+                    for (Double value : values) {
+                        if (value != null) {
+                            if (value > curMax) {
+                                curMax = value;
+                            }
+                            // Special case: ignore -100.05 for the min calculation.
+                            if (value < curMin && value != -100.05) {
+                                curMin = value;
+                            }
+                        }
+                    }
+                } else {
+                    // Only process the first index (actual value) of the array.
+                    Double value = values[0];
+                    if (value != null) {
+                        if (value > curMax) {
+                            curMax = value;
+                        }
+                        if (value < curMin && value != -100.05) {
+                            curMin = value;
+                        }
+                    }
+                }
+            }
+        }
+        if(activeEmployees.isEmpty() == false) { // handling for dynamic range now
+                // if(curMax > yAxisMax){
+                    yAxisMax = (int) (Math.ceil(curMax / 5.0) * 5);
+                // } 
+                // if(curMin < yAxisMin){
+                    yAxisMin = (int) (Math.floor(curMin / 5.0) * 5);
+                // }
+        } else {
+            yAxisMax = 10;
+            yAxisMin = -10;
+        }
         for (int y = yAxisMin; y <= yAxisMax; y += 5) { // loop over the axis in 5 increments, maybe this is gonna change idk
             int yPos = mapY(y); // find pixel postion, play around with this until it lines up, play aroudn with above yAxisMin start point too
             if(0 > yAxisMin && 0 < yAxisMax){
@@ -172,12 +214,7 @@ public class Graph extends JPanel {
         // this works exaclty like disaplayemployeedata, but because i want this to be seperably toggleable, i have to caputre current state and save it to be repainted
         if (flag) {
             Stroke originalStroke = g2.getStroke(); // save original stroke, which is basically currenlty what is dispalyed
-            Stroke dashed = new BasicStroke(1.5f,
-                                            BasicStroke.CAP_BUTT,
-                                            BasicStroke.JOIN_MITER,
-                                            10.0f,
-                                            new float[]{10.0f},
-                                            0.0f);
+            Stroke dashed = new BasicStroke(1.5f,BasicStroke.CAP_BUTT,BasicStroke.JOIN_MITER,10.0f,new float[]{10.0f},0.0f);
             g2.setStroke(dashed); // dashed pattern from chatgpt
             g2.setColor(Color.darkGray); // all expected numerics are the same color
 
