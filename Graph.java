@@ -13,12 +13,14 @@ public class Graph extends JPanel {
     private static final int PADDING = 90; // margins
     private int yAxisMin = -10; // going to change this so it is dynamic, where the min is rounded to the next lowest 5 and max is rounded to next highest five, so the spread of lines is greatest no matter what
     private int yAxisMax = 10;
+    private final int HOVER_THRESHOLD = 5;
     
     private Point hoverPoint = null; // default null cuz nothing is displayed yet
     private String hoverText = null;
     
     private boolean showExpected = false; // flag for overlay
 
+    private final PointValue curPoint = new PointValue(hoverPoint, -1, null); // value does not matter, just want the cur point we are hovering over
     private final List<PointValue> dataPoints = new ArrayList<>(); // a list of each positon to be made ong arph, 
     
     private final List<Employee> activeEmployees = new ArrayList<>(); // luist of active employeees to go on the list in main
@@ -77,14 +79,14 @@ public class Graph extends JPanel {
     }
     
     private void checkHover(int mouseX, int mouseY) {
-        final int HOVER_THRESHOLD = 5; // how clsoe we consider it to be, in pixels, to display data
+        // final int HOVER_THRESHOLD = 5; // how clsoe we consider it to be, in pixels, to display data
         hoverPoint = null;
         hoverText = null;
         for (PointValue pv : dataPoints) { // if it is in the dataPoints, then we display the corresponding employee stuff
             if (Math.abs(pv.point.x - mouseX) <= HOVER_THRESHOLD && Math.abs(pv.point.y - mouseY) <= HOVER_THRESHOLD) { // uses absolute value to check if BOTH x and y are within the threshold
                 hoverPoint = new Point(mouseX, mouseY); // if they are, change the variable to the current point
                 hoverText = String.format("%s: %.1f", pv.employee.getName().chars().mapToObj(c -> String.valueOf((char) c)).takeWhile(c -> !c.equals(",")).reduce("", String::concat), pv.value); // and display, googled inline maping so i onyl get the last name, chat helped here obv
-                break; // stop when u find one
+                break; // stop when u find one, can only be one cuz we only want to display one
             }
         }
     }
@@ -110,11 +112,26 @@ public class Graph extends JPanel {
         if (showExpected) {
             displayExpected(g2, true);
         }
-        
+
         drawHoverTooltip(g2);
+        highLightPointClick(g2);
     }
 
+    private void highLightPointClick(Graphics2D g2){
+        if(hoverPoint != null && hoverText != null){ // same as below, if we are hovering, then we draw it on what we are hoving at
+            g2.setColor(new Color(255, 255, 0));
+            for(PointValue pv : dataPoints){
+                if (Math.abs(pv.point.x - hoverPoint.x) <= HOVER_THRESHOLD && Math.abs(pv.point.y - hoverPoint.y) <= HOVER_THRESHOLD) { // exact match
+                g2.fillOval(pv.point.x - 3, pv.point.y - 3, 6, 6);
+                // g2.drawLine(pv.point.x - 3, pv.point.y - 10, pv.point.x - 3, pv.point.y - 5);
+                break;
+                }   
+            }
+        }
+    }
+            // g2.fillOval(hoverPoint.x, hoverPoint.y, 6, 6);
     
+
     private void drawHoverTooltip(Graphics2D g2) {
         if (hoverPoint != null && hoverText != null) { // fi we are hovering
             int x = hoverPoint.x + 10; // rectanlge size for text

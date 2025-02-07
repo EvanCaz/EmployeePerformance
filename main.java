@@ -94,16 +94,18 @@ public class main {
             int selectedIndex = employeeDropdown.getSelectedIndex();
             Employee selectedEmployee = employees.get(selectedIndex);
             if(prevEmpindex.isEmpty() == true || !prevEmpindex.contains(selectedIndex)){
+                // System.out.println("Testing 1: " + prevEmpindex);
                 graph.toggleEmployee(selectedEmployee);
                 updateLabel.run();
                 prevEmpindex.add(selectedIndex);
                 employeeDropdown.setSelectedIndex(selectedIndex);
             } else if(prevEmpindex.contains(selectedIndex)){
+                // System.out.println("Testing 2: " + prevEmpindex);
                 graph.toggleEmployee(selectedEmployee);
                 updateLabel.run();
                 prevEmpindex.remove(selectedIndex);
                 employeeDropdown.setSelectedIndex(-1);
-            }
+            } 
         });
         
         displayAllButton.addActionListener(e -> {
