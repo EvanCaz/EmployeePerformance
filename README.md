@@ -12,13 +12,16 @@ Encompassed in 1.0, I created a Java Swing app that visualizes employee metrics 
 
 1.1.0: Expected performance is now a switch, and dynamic range always keeps things as focused as can be. Bug handling of if the name does not contain a comma was not implemented. This is not published for personal reasons.
 
-1.1.1: little fixes and dynamic range issues
-
-1.1.2: quality of life features and set for the dropdown menu
 
 1.2.0: Will also add the ability to display certain groups. I know employees are classfied as a group, so another dropdown menu, or control function, will be used to display certain groups. In the CSV file, each employee, in the fifth column, contains their group. This can be added as an attribute.
 
-1.3.0: Add a feature to allow clicking of two points; after selecting two, the tooltip at the mouse will display the percent gained or lost.
+1.2.1: little fixes and dynamic range issues
+
+1.2.2: quality of life features and set for the dropdown menu
+
+1.3.0: Add a feature to allow clicking of two points; after selecting two, the tooltip at the mouse will display the percent gained or lost. Addiitonaly, a feature to determine how far off a specifc point when clicked is from the expected point.
+
+1.4.0: add a feature that displays all employees who averaged positive numbers or average a positive number of months, same with negative.
 
 ## 🚀 Usage instructions
 
