@@ -11,7 +11,7 @@ import java.util.List;
 
 public class main {
 
-    private static Set<Integer> prevEmpindex = new HashSet();
+    private static Set<Integer> prevEmpindex = new HashSet(); // quality of life stuff
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             JFileChooser fileChooser = new JFileChooser();
@@ -103,23 +103,8 @@ public class main {
                 updateLabel.run();
                 prevEmpindex.remove(selectedIndex);
                 employeeDropdown.setSelectedIndex(-1);
-            } 
-
-            
-            // if (selectedIndex == prevEmpIndex.peek()) { // iff when i selkect something from dropdown, update the active employee, it resets too 
-            //     graph.toggleEmployee(selectedEmployee);
-            //     updateLabel.run();
-            //     prevEmpIndex = -1;
-            //     employeeDropdown.setSelectedIndex(-1); // resets here
-            // } else {
-            //     graph.toggleEmployee(selectedEmployee);
-            //     updateLabel.run();
-            //     prevEmpIndex = selectedIndex;
-            //     employeeDropdown.setSelectedIndex(selectedIndex); 
-            // }
+            }
         });
-    
-        // yAxisButton.addActionListener(e -> showYAxisDialog(graph)); // open the smaller boc to chagne range
         
         displayAllButton.addActionListener(e -> {
             graph.setEmployees(employees);
@@ -143,11 +128,6 @@ public class main {
             updateLabel.run();
         });
         
-
-        
-        
-
-
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true); //swing stuff
@@ -176,38 +156,4 @@ public class main {
             label.setText(sb.toString());
         }
     }
-
-    // private static void showYAxisDialog(Graph graph) { // this should never be used outside the class
-    //     JPanel panel = new JPanel(new GridLayout(2, 2)); // this containts the input fields below, kinda backwards
-        
-    //     JTextField minField = new JTextField("-25"); // default to these values which are same in graph class, these are the creation of both inut fields
-    //     JTextField maxField = new JTextField("25");
-        
-    //     panel.add(new JLabel("Y-Axis Minimum:")); // adding labels to the fields and addings corresponding text from a second ago
-    //     panel.add(minField);
-    //     panel.add(new JLabel("Y-Axis Maximum:"));
-    //     panel.add(maxField);
-    
-    //     int result = JOptionPane.showConfirmDialog( // display the dialgo box when pressed
-    //         null, // center in the middle of window
-    //         panel,
-    //         "Set Y-Axis Range", // title
-    //         JOptionPane.OK_CANCEL_OPTION // built in two options
-    //     );
-    
-    //     if (result == JOptionPane.OK_OPTION) { // if it is an okay option or valid
-    //         try {
-    //             int newMin = Integer.parseInt(minField.getText()); // get the text convert to integer and store it for pasing into my graph object
-    //             int newMax = Integer.parseInt(maxField.getText());
-    //             graph.setYAxisRange(newMin, newMax); // pass here
-    //         } catch (IllegalArgumentException ex) {
-    //             JOptionPane.showMessageDialog( // if bad option, display below
-    //                 null,
-    //                 "Invalid input. Please enter valid integers where min < max.",
-    //                 "Input Error",
-    //                 JOptionPane.ERROR_MESSAGE
-    //             );
-    //         }
-    //     }
-    // }
 }

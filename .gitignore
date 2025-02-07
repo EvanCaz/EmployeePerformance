@@ -6,7 +6,7 @@
 !*.java
 !.gitignore
 !*.svg
-!*.jar
+# !*.jar
 !*.md
 !*.png
 
