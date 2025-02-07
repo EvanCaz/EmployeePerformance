@@ -1,6 +1,6 @@
 import javax.swing.*;
 import javax.swing.border.Border;
-
+import java.util.Stack;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -9,6 +9,8 @@ import java.util.List;
 // import java.util.stream.Collectors;
 
 public class main {
+
+    private static Stack<Integer> prevEmpindex = new Stack<>();
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             JFileChooser fileChooser = new JFileChooser();
@@ -87,15 +89,33 @@ public class main {
     
         // listenrs
     
-        employeeDropdown.addActionListener(e -> {
+        employeeDropdown.addActionListener(e -> { // need to fix so then when selecting same on it clears
             int selectedIndex = employeeDropdown.getSelectedIndex();
-            if (selectedIndex >= 0) { // iff when i selkect something from dropdown, update the active employee, it resets too 
-                Employee selectedEmployee = employees.get(selectedIndex);
+            Employee selectedEmployee = employees.get(selectedIndex);
+            if(prevEmpindex.isEmpty() == true || prevEmpindex.peek() != selectedIndex){
                 graph.toggleEmployee(selectedEmployee);
                 updateLabel.run();
+                prevEmpindex.push(selectedIndex);
+                employeeDropdown.setSelectedIndex(selectedIndex);
+            } else if(prevEmpindex.peek() == selectedIndex){
+                graph.toggleEmployee(selectedEmployee);
+                updateLabel.run();
+                prevEmpindex.pop();
+                employeeDropdown.setSelectedIndex(-1);
+            } 
 
-                employeeDropdown.setSelectedIndex(employeeDropdown.getSelectedIndex()); // resets here
-            }
+            
+            // if (selectedIndex == prevEmpIndex.peek()) { // iff when i selkect something from dropdown, update the active employee, it resets too 
+            //     graph.toggleEmployee(selectedEmployee);
+            //     updateLabel.run();
+            //     prevEmpIndex = -1;
+            //     employeeDropdown.setSelectedIndex(-1); // resets here
+            // } else {
+            //     graph.toggleEmployee(selectedEmployee);
+            //     updateLabel.run();
+            //     prevEmpIndex = selectedIndex;
+            //     employeeDropdown.setSelectedIndex(selectedIndex); 
+            // }
         });
     
         // yAxisButton.addActionListener(e -> showYAxisDialog(graph)); // open the smaller boc to chagne range
