@@ -16,9 +16,9 @@ Encompassed in 1.0, I created a Java Swing app that visualizes employee metrics 
 
 1.1.2: quality of life features and set for the dropdown menu
 
-1.2.0: Will also add the ability to display certain groups. I know employees are classfied as a group, so another dropdown menu, or control function, will be used to display certain groups. In the CSV file, each employee, in the fifth column, contains their group. This can be added as an attribute.
+1.2.0: Add a feature to allow clicking of two points; after selecting two, the tooltip at the mouse will display the percent gained or lost. Addiitonaly, a feature to determine how far off a specifc point when clicked is from the expected point, and if clicking two points belonging to two different employees, but in the same month, display how much better one performed over the other.
 
-1.3.0: Add a feature to allow clicking of two points; after selecting two, the tooltip at the mouse will display the percent gained or lost. Addiitonaly, a feature to determine how far off a specifc point when clicked is from the expected point, and if clicking two points belonging to two different employees, but in the same month, display how much better one performed over the other.
+1.3.0: Will also add the ability to display certain groups. I know employees are classfied as a group, so another dropdown menu, or control function, will be used to display certain groups. In the CSV file, each employee, in the fifth column, contains their group. This can be added as an attribute.
 
 1.4.0: add a feature that displays all employees who averaged positive numbers entirely or average a positive number of months, same with negative.
 

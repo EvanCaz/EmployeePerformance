@@ -15,12 +15,14 @@ public class Graph extends JPanel {
     private int yAxisMax = 10;
     private final int HOVER_THRESHOLD = 5;
     
+    
+    private PointValue firstClickedValue = null; // couldve used a set, so more than two could be selected, but idk why youd want more than 2
+    private PointValue secondClickedValue = null;
     private Point hoverPoint = null; // default null cuz nothing is displayed yet
     private String hoverText = null;
     
     private boolean showExpected = false; // flag for overlay
 
-    private final PointValue curPoint = new PointValue(hoverPoint, -1, null); // value does not matter, just want the cur point we are hovering over
     private final List<PointValue> dataPoints = new ArrayList<>(); // a list of each positon to be made ong arph, 
     
     private final List<Employee> activeEmployees = new ArrayList<>(); // luist of active employeees to go on the list in main
@@ -32,6 +34,13 @@ public class Graph extends JPanel {
             public void mouseMoved(MouseEvent e) {
                 checkHover(e.getX(), e.getY()); // update the state if we need to, if the mouse is withing the pixel box we draw, checkHover will dispaly
                 repaint(); // and update the graoph, but weird ass name
+            }
+        });
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                captureClickedPoint(e.getX(), e.getY());
+                repaint(); // Optionally repaint if you want to show the selection
             }
         });
     }
@@ -62,6 +71,8 @@ public class Graph extends JPanel {
     
     public void clearEmployees() { // clear all 
         activeEmployees.clear();
+        secondClickedValue = null;
+        firstClickedValue = null;
         repaint();
     }
     
@@ -90,6 +101,26 @@ public class Graph extends JPanel {
             }
         }
     }
+
+    private void captureClickedPoint(int mouseX, int mouseY){
+        // firstClickedValue = null;
+        PointValue clicked = null;
+        for(PointValue pv : dataPoints){
+            if(Math.abs(pv.point.x - mouseX) <= HOVER_THRESHOLD && Math.abs(pv.point.y - mouseY) <= HOVER_THRESHOLD){
+                clicked = pv;
+                System.out.println("Clicked on: " + pv.employee.getName() + " with value: " + pv.value);
+                break;
+            }
+        }
+        if(firstClickedValue != null && secondClickedValue != null){
+            firstClickedValue = clicked;
+            secondClickedValue = null;
+        } else if (firstClickedValue != null && secondClickedValue == null){
+            secondClickedValue = clicked;
+        } else if (firstClickedValue == null && secondClickedValue == null){
+            firstClickedValue = clicked;
+        }
+    }
     
     @Override
     protected void paintComponent(Graphics g) {
@@ -114,19 +145,27 @@ public class Graph extends JPanel {
         }
 
         drawHoverTooltip(g2);
-        highLightPointClick(g2);
+        highLightPoint(g2);
     }
 
-    private void highLightPointClick(Graphics2D g2){
+    private void highLightPoint(Graphics2D g2){
+        g2.setColor(new Color(255, 255, 0));
+        if(firstClickedValue != null){
+            g2.fillOval(firstClickedValue.point.x - 3, firstClickedValue.point.y - 3, 6, 6);
+        }
+        if(secondClickedValue != null){
+            g2.fillOval(secondClickedValue.point.x - 3, secondClickedValue.point.y - 3, 6, 6);
+        }
         if(hoverPoint != null && hoverText != null){ // same as below, if we are hovering, then we draw it on what we are hoving at
-            g2.setColor(new Color(255, 255, 0));
             for(PointValue pv : dataPoints){
                 if (Math.abs(pv.point.x - hoverPoint.x) <= HOVER_THRESHOLD && Math.abs(pv.point.y - hoverPoint.y) <= HOVER_THRESHOLD) { // exact match
                 g2.fillOval(pv.point.x - 3, pv.point.y - 3, 6, 6);
+
                 // g2.drawLine(pv.point.x - 3, pv.point.y - 10, pv.point.x - 3, pv.point.y - 5);
                 break;
                 }   
             }
+            
         }
     }
             // g2.fillOval(hoverPoint.x, hoverPoint.y, 6, 6);
