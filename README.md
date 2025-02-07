@@ -4,19 +4,21 @@
 
 ## ℹ️ Overview
 
-Encompassed in 1.0, I created a Java Swing App that visualizes employee metrics for readability. It parse a excel file saved as a csv, gathers all the employee information, and displays it dynamically. Each employee is assigned a unique color and their data is plotted on the graph. The user can change the range of the graph, and it will also update accordingly to the months present in the csv file. The graph is in real time and updates at the users leisure. 
+Encompassed in 1.0, I created a Java Swing app that visualizes employee metrics for readability. It parses an Excel file saved as a CSV, gathers all the employee information, and displays it dynamically. Each employee is assigned a unique color, and their data is plotted on the graph. The user can change the range of the graph, and it will also update it according to the months present in the CSV file. The graph is in real-time and updates at the user's leisure.
 
-1.0.1, Fixed plotting math issue where everything was skewed upwards by ten pixels, add horizontal line.
+1.0.1: Fixed plotting math issue where everything was skewed upwards by ten pixels; added horizontal line.
 
-1.0.2. Fixed minor bugs and figured out github release publishing. 
+1.0.2: Fixed minor bugs and figured out GitHub release publishing.
 
-1.1 will have expected performance plotted with a switch to turn on and off, as well as potential issues/edge cases I have thought off handled correctly. This includes the way the name is parsed from the file. Some individuals may not have a last name, or their name may be entered into the excel file differently. Right now, a comma is used to seperate the first and last name, but in a csv file a comma dictates a row. From the start, the data of interest in the excel file is one column over from the corresponding month, but because of the comma in the name, the parser does not need the additional + 1 column count. This could cause an issue. Additionaly, more control flow options will be added, such as choose a new file without closing. 
+1.1.0: Expected performance is now a switch, and dynamic range always keeps things as focused as can be. Bug handling of if the name does not contain a comma was not implemented. This is not published for personal reasons.
 
-Will also add the ability to display certain groups. I know employees are classfied as a group, so another dropdown menu, or control function, will be used to display certain groups. In the csv file, each employee, in the fifth column, contains their group. This can be added as an attribute.
+1.2.0: Will also add the ability to display certain groups. I know employees are classfied as a group, so another dropdown menu, or control function, will be used to display certain groups. In the CSV file, each employee, in the fifth column, contains their group. This can be added as an attribute.
+
+1.3.0: Add a feature to allow clicking of two points; after selecting two, the tooltip at the mouse will display the percent gained or lost.
 
 ## 🚀 Usage instructions
 
-Is now a .exe file located in published section on github. Folder includes the .exe as well as the jre folder, all compressed togethor.
+It is now an .exe file located in the published section on GitHub. The folder includes the .exe as well as the JRE folder, all compressed together.
 
 ## 🌟 Highlights
 

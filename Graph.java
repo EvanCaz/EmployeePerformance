@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 
 public class Graph extends JPanel {
     private static final int PADDING = 90; // margins
-    private int yAxisMin = -15; // going to change this so it is dynamic, where the min is rounded to the next lowest 5 and max is rounded to next highest five, so the spread of lines is greatest no matter what
-    private int yAxisMax = 25;
+    private int yAxisMin = -10; // going to change this so it is dynamic, where the min is rounded to the next lowest 5 and max is rounded to next highest five, so the spread of lines is greatest no matter what
+    private int yAxisMax = 10;
     
     private Point hoverPoint = null; // default null cuz nothing is displayed yet
     private String hoverText = null;
@@ -83,7 +83,7 @@ public class Graph extends JPanel {
         for (PointValue pv : dataPoints) { // if it is in the dataPoints, then we display the corresponding employee stuff
             if (Math.abs(pv.point.x - mouseX) <= HOVER_THRESHOLD && Math.abs(pv.point.y - mouseY) <= HOVER_THRESHOLD) { // uses absolute value to check if BOTH x and y are within the threshold
                 hoverPoint = new Point(mouseX, mouseY); // if they are, change the variable to the current point
-                hoverText = String.format("%s: %.1f", pv.employee.getName().chars().mapToObj(c -> String.valueOf((char) c)).takeWhile(c -> !c.equals(",")).reduce("", String::concat), pv.value); // and display, googled inline maping so i onyl get the last name
+                hoverText = String.format("%s: %.1f", pv.employee.getName().chars().mapToObj(c -> String.valueOf((char) c)).takeWhile(c -> !c.equals(",")).reduce("", String::concat), pv.value); // and display, googled inline maping so i onyl get the last name, chat helped here obv
                 break; // stop when u find one
             }
         }
@@ -174,16 +174,21 @@ public class Graph extends JPanel {
             }
         }
         if(activeEmployees.isEmpty() == false) { // handling for dynamic range now
-                // if(curMax > yAxisMax){
+                if( (int) (Math.ceil(curMax / 5.0) * 5) <= 0){
+                    yAxisMax = 5;
+                } else {
                     yAxisMax = (int) (Math.ceil(curMax / 5.0) * 5);
-                // } 
-                // if(curMin < yAxisMin){
+                }
+                if ( (int) (Math.floor(curMin / 5.0) * 5) >= 0){
+                    yAxisMin = -5;
+                } else {
                     yAxisMin = (int) (Math.floor(curMin / 5.0) * 5);
-                // }
-        } else {
-            yAxisMax = 10;
-            yAxisMin = -10;
-        }
+                }
+            }
+        //     } else {
+        //     yAxisMax = 10;
+        //     yAxisMin = -10;
+        // }
         for (int y = yAxisMin; y <= yAxisMax; y += 5) { // loop over the axis in 5 increments, maybe this is gonna change idk
             int yPos = mapY(y); // find pixel postion, play around with this until it lines up, play aroudn with above yAxisMin start point too
             if(0 > yAxisMin && 0 < yAxisMax){

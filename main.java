@@ -28,12 +28,10 @@ public class main {
                     if (!employees.isEmpty()) {
                         createAndShowGUI(employees);
                     } else {
-                        JOptionPane.showMessageDialog(null, "No employees found in the file.",
-                                                      "Parsing Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(null, "No employees found in the file.","Parsing Error", JOptionPane.ERROR_MESSAGE);
                     }
                 } catch (IOException e) {
-                    JOptionPane.showMessageDialog(null, "Error reading CSV file: " + e.getMessage(),
-                                                  "File Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Error reading CSV file: " + e.getMessage(),"File Error", JOptionPane.ERROR_MESSAGE);
                 }
             } else {
                 // User canceled file selection; exit gracefully.
@@ -49,9 +47,9 @@ public class main {
         frame.setLayout(new BorderLayout()); // how I plane to arrange everything inside
     
         JPanel controlPanelNorth = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10)); // area for all the buttons and drop down, "controlPanelNorth" is created and flowlayout means the stuff is in a row
-        JPanel controlPanelSouth = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10)); // for extra buttons
+        // JPanel controlPanelSouth = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10)); // for extra buttons
         controlPanelNorth.setBackground(Color.LIGHT_GRAY);
-        controlPanelSouth.setBackground(Color.LIGHT_GRAY);
+        // controlPanelSouth.setBackground(Color.LIGHT_GRAY);
         
         JComboBox<String> employeeDropdown = new JComboBox<>( // jcombo is the swing drop down, 
             employees.stream()
@@ -60,17 +58,17 @@ public class main {
         );
         employeeDropdown.setSelectedIndex(-1); // initial selection is none
         
-        JButton yAxisButton = new JButton("Change Range"); // change the range of the graph button
+        // JButton yAxisButton = new JButton("Change Range"); // change the range of the graph button
         
         JButton displayAllButton = new JButton("Display All"); // button defintions for addition control buttons
         JButton clearAllButton = new JButton("Clear All");
         JToggleButton toggleExpectedPerformance = new JToggleButton("Expected Performance Off");
     
         controlPanelNorth.add(employeeDropdown); // adding all of these to the flowlayout jpanel
-        controlPanelNorth.add(yAxisButton);
+        // controlPanelNorth.add(yAxisButton);
         controlPanelNorth.add(displayAllButton);
         controlPanelNorth.add(clearAllButton);
-        controlPanelSouth.add(toggleExpectedPerformance);
+        controlPanelNorth.add(toggleExpectedPerformance);
         
         JLabel activeEmployeesLabel = new JLabel("Active Employees: None"); // default selection is none, this is position right below controlPanelNorth
         activeEmployeesLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
@@ -84,7 +82,7 @@ public class main {
     
         frame.add(controlPanelNorth, BorderLayout.NORTH); // the controlPanelNorth is added to the top of this new jpanel
         frame.add(graphContainer, BorderLayout.CENTER); // the graph is added to the center, but realisticlay the everything else besides north
-        frame.add(controlPanelSouth, BorderLayout.SOUTH);
+        // frame.add(controlPanelSouth, BorderLayout.SOUTH);
         Runnable updateLabel = () -> updateActiveEmployeesLabel(activeEmployeesLabel, graph); // chatgpt helped, idk what runnable is but this is a listener to update active employees
     
         // listenrs
@@ -100,7 +98,7 @@ public class main {
             }
         });
     
-        yAxisButton.addActionListener(e -> showYAxisDialog(graph)); // open the smaller boc to chagne range
+        // yAxisButton.addActionListener(e -> showYAxisDialog(graph)); // open the smaller boc to chagne range
         
         displayAllButton.addActionListener(e -> {
             graph.setEmployees(employees);
@@ -158,37 +156,37 @@ public class main {
         }
     }
 
-    private static void showYAxisDialog(Graph graph) { // this should never be used outside the class
-        JPanel panel = new JPanel(new GridLayout(2, 2)); // this containts the input fields below, kinda backwards
+    // private static void showYAxisDialog(Graph graph) { // this should never be used outside the class
+    //     JPanel panel = new JPanel(new GridLayout(2, 2)); // this containts the input fields below, kinda backwards
         
-        JTextField minField = new JTextField("-25"); // default to these values which are same in graph class, these are the creation of both inut fields
-        JTextField maxField = new JTextField("25");
+    //     JTextField minField = new JTextField("-25"); // default to these values which are same in graph class, these are the creation of both inut fields
+    //     JTextField maxField = new JTextField("25");
         
-        panel.add(new JLabel("Y-Axis Minimum:")); // adding labels to the fields and addings corresponding text from a second ago
-        panel.add(minField);
-        panel.add(new JLabel("Y-Axis Maximum:"));
-        panel.add(maxField);
+    //     panel.add(new JLabel("Y-Axis Minimum:")); // adding labels to the fields and addings corresponding text from a second ago
+    //     panel.add(minField);
+    //     panel.add(new JLabel("Y-Axis Maximum:"));
+    //     panel.add(maxField);
     
-        int result = JOptionPane.showConfirmDialog( // display the dialgo box when pressed
-            null, // center in the middle of window
-            panel,
-            "Set Y-Axis Range", // title
-            JOptionPane.OK_CANCEL_OPTION // built in two options
-        );
+    //     int result = JOptionPane.showConfirmDialog( // display the dialgo box when pressed
+    //         null, // center in the middle of window
+    //         panel,
+    //         "Set Y-Axis Range", // title
+    //         JOptionPane.OK_CANCEL_OPTION // built in two options
+    //     );
     
-        if (result == JOptionPane.OK_OPTION) { // if it is an okay option or valid
-            try {
-                int newMin = Integer.parseInt(minField.getText()); // get the text convert to integer and store it for pasing into my graph object
-                int newMax = Integer.parseInt(maxField.getText());
-                graph.setYAxisRange(newMin, newMax); // pass here
-            } catch (IllegalArgumentException ex) {
-                JOptionPane.showMessageDialog( // if bad option, display below
-                    null,
-                    "Invalid input. Please enter valid integers where min < max.",
-                    "Input Error",
-                    JOptionPane.ERROR_MESSAGE
-                );
-            }
-        }
-    }
+    //     if (result == JOptionPane.OK_OPTION) { // if it is an okay option or valid
+    //         try {
+    //             int newMin = Integer.parseInt(minField.getText()); // get the text convert to integer and store it for pasing into my graph object
+    //             int newMax = Integer.parseInt(maxField.getText());
+    //             graph.setYAxisRange(newMin, newMax); // pass here
+    //         } catch (IllegalArgumentException ex) {
+    //             JOptionPane.showMessageDialog( // if bad option, display below
+    //                 null,
+    //                 "Invalid input. Please enter valid integers where min < max.",
+    //                 "Input Error",
+    //                 JOptionPane.ERROR_MESSAGE
+    //             );
+    //         }
+    //     }
+    // }
 }
