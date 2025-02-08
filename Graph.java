@@ -11,10 +11,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Graph extends JPanel {
-    private static final int PADDING = 60; // margins
+    private static final int PADDING = 70; // margins
     private int yAxisMin = -5; // going to change this so it is dynamic, where the min is rounded to the next lowest 5 and max is rounded to next highest five, so the spread of lines is greatest no matter what
     private int yAxisMax = 30;
-    private final int HOVER_THRESHOLD = 10;
+    private final int HOVER_THRESHOLD = 7;
     private String differenceLabel; // this is the varable that is changed to indicate difference
     
     private PointValue firstClickedValue = null; // couldve used a set, so more than two could be selected, but idk why youd want more than 2
@@ -115,13 +115,17 @@ public class Graph extends JPanel {
 
         double percentDifference = ((later.value - earlier.value) / earlier.value) * 100;
         if (firstClickedValue.employee == secondClickedValue.employee && firstClickedValue.expected == false && secondClickedValue.expected == false){ // if two points of the same employee are selected and there both not expected values
-            label = "Difference of: " + String.format("%.2f", percentDifference) + "%";
+            if(percentDifference < 0){
+                label = "Lost " + String.format("%.2f", percentDifference) + "% from " + earlier.month + " to " +later.month;
+            } else {
+                label = "Gained " + String.format("%.2f", percentDifference) + "% from " + earlier.month + " to " + later.month;
+            }
         } else if(firstClickedValue.employee == secondClickedValue.employee && firstClickedValue.month.equals(secondClickedValue.month) && ((firstClickedValue.expected == false && secondClickedValue.expected == true) || (firstClickedValue.expected == true && secondClickedValue.expected == false))){ // same employee, same month, one expected one not expected
             percentDifference = ((Math.max(firstClickedValue.value, secondClickedValue.value) - Math.min(firstClickedValue.value, secondClickedValue.value)) / ((firstClickedValue.value + secondClickedValue.value) / 2)) * 100;
             if(firstClickedValue.value > secondClickedValue.value && firstClickedValue.expected == true){
-                label = firstClickedValue.employee.getName().split(",")[0] + " Performed -" + String.format("%.2f", percentDifference) + "% under expected "  + firstClickedValue.month;
+                label = firstClickedValue.employee.getName().split(",")[0] + " under performed in " + firstClickedValue.month + " by -" + String.format("%.2f", percentDifference) + "%";
             } else if(firstClickedValue.value < secondClickedValue.value && firstClickedValue.expected == false){
-                label = firstClickedValue.employee.getName().split(",")[0] + " Performed -" + String.format("%.2f", percentDifference) + "% under expected "  + firstClickedValue.month;
+                label = firstClickedValue.employee.getName().split(",")[0] + " under performed in " + firstClickedValue.month + " by -" + String.format("%.2f", percentDifference) + "%";
             } else {
                 label = firstClickedValue.employee.getName().split(",")[0] + " Performed " + String.format("%.2f", percentDifference) + "% over expected in " + firstClickedValue.month;
             }
@@ -161,7 +165,7 @@ public class Graph extends JPanel {
         for (PointValue pv : dataPoints) { // if it is in the dataPoints, then we display the corresponding employee stuff
             if (Math.abs(pv.point.x - mouseX) <= HOVER_THRESHOLD && Math.abs(pv.point.y - mouseY) <= HOVER_THRESHOLD) { // uses absolute value to check if BOTH x and y are within the threshold
                 hoverPoint = new Point(mouseX, mouseY); // if they are, change the variable to the current point
-                hoverText = String.format("%s: %.1f", pv.employee.getName().chars().mapToObj(c -> String.valueOf((char) c)).takeWhile(c -> !c.equals(",")).reduce("", String::concat), pv.value); // and display, googled inline maping so i onyl get the last name, chat helped here obv
+                hoverText = String.format("%s (%s): %.1f", pv.employee.getName().split(",")[0], pv.employee.getOrg(), pv.value); // and display, googled inline maping so i onyl get the last name, chat helped here obv
                 break; // stop when u find one, can only be one cuz we only want to display one
             }
         }

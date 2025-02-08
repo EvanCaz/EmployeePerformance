@@ -57,11 +57,7 @@ public class main {
         controlPanelNorth.setBackground(Color.LIGHT_GRAY);
         // controlPanelSouth.setBackground(Color.LIGHT_GRAY);
         
-        JComboBox<String> employeeDropdown = new JComboBox<>( // jcombo is the swing drop down, 
-            employees.stream()
-                     .map(Employee::getName) // maps all the names of the emoployees with getName method of my employee class
-                     .toArray(String[]::new) // converts this toa  string array
-        );
+        JComboBox<String> employeeDropdown = new JComboBox<>( employees.stream().map(Employee::getName).toArray(String[]::new));
         employeeDropdown.setSelectedIndex(-1); // initial selection is none
         
         JComboBox<String> orgDropdown = new JComboBox<>(employees.stream().map(Employee::getOrg).collect(Collectors.toSet()).toArray(new String[0])); // same as above
@@ -100,6 +96,10 @@ public class main {
     
         employeeDropdown.addActionListener(e -> { // need to fix so then when selecting same on it clears
             int selectedIndex = employeeDropdown.getSelectedIndex();
+            if (selectedIndex == -1) {
+                return;
+            }
+            orgDropdown.setSelectedIndex(-1);
             Employee selectedEmployee = employees.get(selectedIndex);
             if(prevEmpindex.isEmpty() == true || !prevEmpindex.contains(selectedIndex)){
                 // System.out.println("Testing 1: " + prevEmpindex);
@@ -122,6 +122,7 @@ public class main {
             if(selectedIndex == -1){
                 return;
             }
+            employeeDropdown.setSelectedIndex(-1);
             String selectedOrg = (String) orgDropdown.getSelectedItem();
             graph.clearEmployees();
             for(Employee emp : employees){
@@ -143,6 +144,7 @@ public class main {
         clearAllButton.addActionListener(e -> {
             graph.clearEmployees();
             orgDropdown.setSelectedIndex(-1);
+            employeeDropdown.setSelectedIndex(-1);
             updateLabel.run();
         });
     
