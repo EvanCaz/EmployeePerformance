@@ -119,14 +119,18 @@ public class main {
 
         orgDropdown.addActionListener(e -> {
             int selectedIndex = orgDropdown.getSelectedIndex();
+            if(selectedIndex == -1){
+                return;
+            }
             String selectedOrg = (String) orgDropdown.getSelectedItem();
             graph.clearEmployees();
-            // employeeDropdown.setSelectedIndex(-1);
             for(Employee emp : employees){
-                if(emp.getOrg() == selectedOrg){
+                // System.out.println(emp.getOrg());
+                if(emp.getOrg().equals(selectedOrg)){
                     graph.toggleEmployee(emp);
                 }
             }
+            updateLabel.run();
             orgDropdown.setSelectedIndex(selectedIndex);
         });
 

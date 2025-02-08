@@ -33,8 +33,8 @@ public class Parser {
                     List<Integer> monthIndices = parseMonthIndices(line2);
                     Employee employee = new Employee(name); // new obj
                     employee.setExpected(Double.parseDouble(parsedData[6])); // should get expected values now, i intepreted the graph wrong
-                    employee.setOrg(employee.getName() + parsedData[4]); // get the org data, i think this works
-                    System.out.println(parsedData[4]); 
+                    employee.setOrg(parsedData[4]); // get the org data, i think this works
+                    // System.out.println(employee.getName() + parsedData[4]); //
                     for (int monthColumn : monthIndices) {
                         String monthName = line2.split(",")[monthColumn].trim(); // access the array at index in month idices to get the name
                         int valueIndex = monthColumn; // get the index for the value we want, 
