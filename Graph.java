@@ -5,6 +5,7 @@ import java.awt.event.MouseEvent;
 import java.util.AbstractMap;
 // import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -12,7 +13,7 @@ import java.util.stream.Collectors;
 public class Graph extends JPanel {
     private static final int PADDING = 90; // margins
     private int yAxisMin = -10; // going to change this so it is dynamic, where the min is rounded to the next lowest 5 and max is rounded to next highest five, so the spread of lines is greatest no matter what
-    private int yAxisMax = 10;
+    private int yAxisMax = 40;
     private final int HOVER_THRESHOLD = 5;
     
     
@@ -197,38 +198,57 @@ public class Graph extends JPanel {
         // g2.drawLine(PADDING, getHeight() / 2, getWidth() - PADDING, getHeight() / 2 ); // draws a lie in the middle, idk why i had it as ifstatement cuz if range changes it wont run
         
         boolean hasRun = false;
+
         double curMax = Double.NEGATIVE_INFINITY;
         double curMin = Double.POSITIVE_INFINITY;
         
         for (Employee emp : activeEmployees) {
-            for (Double[] values : emp.getMonthlyData().values()) {
-                if (showExpected) { // so the range change son if show expected is toggled
-                    // Process both indices in the array.
-                    for (Double value : values) {
-                        if (value != null) {
-                            if (value > curMax) {
-                                curMax = value;
-                            }
-                            // Special case: ignore -100.05 for the min calculation.
-                            if (value < curMin && value != -100.05) {
-                                curMin = value;
-                            }
-                        }
-                    }
-                } else {
-                    // Only process the first index (actual value) of the array.
-                    Double value = values[0];
-                    if (value != null) {
-                        if (value > curMax) {
-                            curMax = value;
-                        }
-                        if (value < curMin && value != -100.05) {
-                            curMin = value;
-                        }
-                    }
+            Map<String, Double> monthlyData = emp.getMonthlyData();
+            double min = Collections.min(monthlyData.values());
+            double max = Collections.max(monthlyData.values());
+            if(showExpected){
+                double expected = emp.getExpected();
+                if(expected > max){
+                    max = expected;
                 }
+                if(expected < min){
+                    min = expected;
+                }
+            }  // if show expected is false, we do not consider it in the calculation of range
+            if(curMax < max){
+                curMax = max;
+            }
+            if(curMin < min){
+                curMin = min;
             }
         }
+        //        for (Double values : emp.getMonthlyData().entrySet().stream().collect(Collectors.toList())) {
+            //     if (showExpected) { // so the range changes on if show expected is toggled
+            //         // Process both indices in the array.
+            //         for (Double value : values) {
+            //             if (value != null) {
+            //                 if (value > curMax) {
+            //                     curMax = value;
+            //                 }
+            //                 // ignore -100.05 for the min calculation.
+            //                 if (value < curMin && value != -100.05) {
+            //                     curMin = value;
+            //                 }
+            //             }
+            //         }
+            //     } else {
+            //         //  process the first index (actual value) of the array.
+            //         Double value = values[0];
+            //         if (value != null) {
+            //             if (value > curMax) {
+            //                 curMax = value;
+            //             }
+            //             if (value < curMin && value != -100.05) {
+            //                 curMin = value;
+            //             }
+            //         }
+            //     }
+            // }
         if(activeEmployees.isEmpty() == false) { // handling for dynamic range now
                 if( (int) (Math.ceil(curMax / 5.0) * 5) <= 0){
                     yAxisMax = 5;
@@ -262,7 +282,7 @@ public class Graph extends JPanel {
         // we use the first active employee’s months if available. Otherwise, use an example.
         if (!activeEmployees.isEmpty()) { // calcualtes the spread of the months, if there were more id suspect this wouldnt work nicely lmao
             Employee sample = activeEmployees.get(0);
-            List<Map.Entry<String, Double>> entries = sample.getMonthlyData().entrySet().stream().map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), entry.getValue()[0])).collect(Collectors.toList()); // chat helped with this for getting only the fist index
+             List<Map.Entry<String, Double>> entries = sample.getMonthlyData().entrySet().stream().collect(Collectors.toList()); // chat helped with this for getting only the fist index
             int xStep = (getWidth() - 2 * PADDING) / entries.size(); // getwidth/2 gets the horizontal space, minus padding, and divides by the number of months, so we get space between
             for (int i = 0; i < entries.size(); i++) {
                 int xPos = PADDING + (i * xStep) + (xStep / 2);
@@ -271,7 +291,7 @@ public class Graph extends JPanel {
         }
     }
 
-    private void displayExpected(Graphics2D g2, boolean flag) { 
+    private void displayExpected(Graphics2D g2, boolean flag) { // temporary fix, but still works, TODO: make it so if emplyoee didnt work, expected also does not get painted
         // this works exaclty like disaplayemployeedata, but because i want this to be seperably toggleable, i have to caputre current state and save it to be repainted
         if (flag) {
             Stroke originalStroke = g2.getStroke(); // save original stroke, which is basically currenlty what is dispalyed
@@ -282,18 +302,17 @@ public class Graph extends JPanel {
             // For each active employee, draw their expected performance.
             for (Employee employee : activeEmployees) {
                 // Get the expected performance values (index 1).
-                List<Map.Entry<String, Double>> entries = employee.getMonthlyData().entrySet().stream().map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), entry.getValue()[1])).collect(Collectors.toList());
-                int xStep = (getWidth() - 2 * PADDING) / entries.size();
+                double expected  = employee.getExpected();
+                int xStep = (getWidth() - 2 * PADDING) / employee.getMonthlyData().size();
                 int prevX = -1;
                 int prevY = -1;
 
-                for (int i = 0; i < entries.size(); i++) {
-                    double value = entries.get(i).getValue();
-                    if (value != -100.05) {
+                for (int i = 0; i < employee.getMonthlyData().size(); i++) {
+                    if (expected != -100.05) {
                         int x = PADDING + (i * xStep) + (xStep / 2);
-                        int y = mapY(value);
+                        int y = mapY(expected);
 
-                        dataPoints.add(new PointValue(new Point(x, y), value, employee)); // for hovering
+                        dataPoints.add(new PointValue(new Point(x, y), expected, employee)); // for hovering
 
                         // draw the circle just as we do with actual performance
                         g2.fillOval(x - 3, y - 3, 6, 6);
@@ -315,12 +334,12 @@ public class Graph extends JPanel {
 
     
     private void drawEmployeeData(Graphics2D g2, Employee employee) {
-        List<Map.Entry<String, Double>> entries = employee.getMonthlyData().entrySet().stream().map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), entry.getValue()[0])).collect(Collectors.toList()); // chat helped with this, gets the first index in the list
+        List<Map.Entry<String, Double>> entries = employee.getMonthlyData().entrySet().stream().collect(Collectors.toList()); // chat helped with this, gets the first index in the list
 ;       // get the employees specifc numbers to be plotted, chat helped with this one liner
         int xStep = (getWidth() - 2 * PADDING) / entries.size(); // calculkate step just like above so they are in line
         int prevX = -1, prevY = -1; // for drawing lines, -1 cuz no point at start
     
-        Color empColor = employee.getDisplayColor() != null ? employee.getDisplayColor() : Color.BLUE; // default color of blue otherwise its whatevey obj is
+        Color empColor = employee.getDisplayColor() != null ? employee.getDisplayColor() : Color.BLACK; // default color of black otherwise its whatevey obj is
         g2.setColor(empColor);
     
         for (int i = 0; i < entries.size(); i++) { 

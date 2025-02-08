@@ -31,18 +31,14 @@ public class Parser {
                     String[] dataValues = Arrays.copyOfRange(parsedData, 1, parsedData.length); // copy the rest of the indexes to an array
                     //  works even if additional months are present, but not sure if it will if not in same column as values
                     List<Integer> monthIndices = parseMonthIndices(line2);
-
                     Employee employee = new Employee(name); // new obj
+                    employee.setExpected(Double.parseDouble(parsedData[6])); // should get expected values now, i intepreted the graph wrong
                     for (int monthColumn : monthIndices) {
                         String monthName = line2.split(",")[monthColumn].trim(); // access the array at index in month idices to get the name
-                        //TODO: this is where id add expected values as well, so it would capute this and the previous one 
                         int valueIndex = monthColumn; // get the index for the value we want, 
-                        int exepectedIndex = monthColumn - 1;
                         if (valueIndex < dataValues.length) { // if it is in the range, capture it
                             double value = parseValue(dataValues[valueIndex].trim()); // trim and capture at the same index, but in our row
-                            double expectedValue = parseValue(dataValues[exepectedIndex].trim());
                             employee.setMonthValue(monthName, value); // initlize the object
-                            employee.setExpectedMonthValue(monthName, expectedValue);
                         }
                     }
                     employees.add(employee); // add to the list of obs
@@ -84,8 +80,8 @@ public class Parser {
         List<String> result = new ArrayList<>();
         if (line.startsWith("\"")) {
             int endQuote = line.indexOf('"', 1);
-            result.add(line.substring(1, endQuote).trim());
-            String dataPart = line.substring(endQuote + 2);
+            result.add(line.substring(1, endQuote).trim()); // get the name
+            String dataPart = line.substring(endQuote); // the plus two here was cutting of the data i want for expected
             Collections.addAll(result, dataPart.split("\\s*,\\s*"));
         } else {
             String[] parts = line.split(",");
