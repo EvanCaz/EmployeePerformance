@@ -1,9 +1,11 @@
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.security.PrivateKey;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -12,6 +14,7 @@ import java.util.List;
 public class main {
 
     private static Set<Integer> prevEmpindex = new HashSet(); // quality of life stuff
+    private static Set<String> orgs = new HashSet<>();
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             JFileChooser fileChooser = new JFileChooser();
@@ -61,6 +64,9 @@ public class main {
         );
         employeeDropdown.setSelectedIndex(-1); // initial selection is none
         
+        JComboBox<String> orgDropdown = new JComboBox<>(employees.stream().map(Employee::getOrg).collect(Collectors.toSet()).toArray(new String[0])); // same as above
+        orgDropdown.setSelectedIndex(-1); // clear it
+
         // JButton yAxisButton = new JButton("Change Range"); // change the range of the graph button
         // JButton calDifference = new JButton("Calculate Difference");
         JButton displayAllButton = new JButton("Display All"); // button defintions for addition control buttons
@@ -68,7 +74,7 @@ public class main {
         JToggleButton toggleExpectedPerformance = new JToggleButton("Expected Performance Off");
     
         controlPanelNorth.add(employeeDropdown); // adding all of these to the flowlayout jpanel
-        // controlPanelSouth.add(calDifference);
+        controlPanelNorth.add(orgDropdown);
         controlPanelNorth.add(displayAllButton);
         controlPanelNorth.add(clearAllButton);
         controlPanelNorth.add(toggleExpectedPerformance);
@@ -97,6 +103,7 @@ public class main {
             Employee selectedEmployee = employees.get(selectedIndex);
             if(prevEmpindex.isEmpty() == true || !prevEmpindex.contains(selectedIndex)){
                 // System.out.println("Testing 1: " + prevEmpindex);
+                orgDropdown.setSelectedIndex(-1);
                 graph.toggleEmployee(selectedEmployee);
                 updateLabel.run();
                 prevEmpindex.add(selectedIndex);
@@ -110,13 +117,28 @@ public class main {
             } 
         });
 
+        orgDropdown.addActionListener(e -> {
+            int selectedIndex = orgDropdown.getSelectedIndex();
+            String selectedOrg = (String) orgDropdown.getSelectedItem();
+            graph.clearEmployees();
+            // employeeDropdown.setSelectedIndex(-1);
+            for(Employee emp : employees){
+                if(emp.getOrg() == selectedOrg){
+                    graph.toggleEmployee(emp);
+                }
+            }
+            orgDropdown.setSelectedIndex(selectedIndex);
+        });
+
         displayAllButton.addActionListener(e -> {
             graph.setEmployees(employees);
+            orgDropdown.setSelectedIndex(-1);
             updateLabel.run();
         });
     
         clearAllButton.addActionListener(e -> {
             graph.clearEmployees();
+            orgDropdown.setSelectedIndex(-1);
             updateLabel.run();
         });
     

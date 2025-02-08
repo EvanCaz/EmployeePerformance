@@ -14,7 +14,7 @@ public class Graph extends JPanel {
     private static final int PADDING = 60; // margins
     private int yAxisMin = -5; // going to change this so it is dynamic, where the min is rounded to the next lowest 5 and max is rounded to next highest five, so the spread of lines is greatest no matter what
     private int yAxisMax = 30;
-    private final int HOVER_THRESHOLD = 5;
+    private final int HOVER_THRESHOLD = 10;
     private String differenceLabel; // this is the varable that is changed to indicate difference
     
     private PointValue firstClickedValue = null; // couldve used a set, so more than two could be selected, but idk why youd want more than 2
@@ -61,6 +61,7 @@ public class Graph extends JPanel {
         } else {
             activeEmployees.add(employee);
         }
+        differenceLabel = null;
         firstClickedValue = null;
         secondClickedValue = null;
         repaint(); // change the graph again
@@ -76,24 +77,53 @@ public class Graph extends JPanel {
     // three cases that we want to calculate.
     // If two points are clicked in same emplyee, cal percent difference
     // if two points are clicked on same employee, but one is expected and one is normal and are the same month, calculate how far off they
-    // if two points are clicked on different employee but on the same month, calculate how much better one performed then the other
+    // if two points are clicked on different employee but on the same month, calculate how much better one performed then the other\
+    private int monthToNumber(String month) { // for comparing down below
+        switch (month.toLowerCase()) {
+            case "january":   return 1;
+            case "february":  return 2;
+            case "march":     return 3;
+            case "april":     return 4;
+            case "may":       return 5;
+            case "june":      return 6;
+            case "july":      return 7;
+            case "august":    return 8;
+            case "september": return 9;
+            case "october":   return 10;
+            case "november":  return 11;
+            case "december":  return 12;
+            default:          return 0;
+        }
+    }
+
     private void calDifference(){ 
         String label = differenceLabel;
-        if(firstClickedValue == null || secondClickedValue == null){ // if one or more points are not selected
+        if(firstClickedValue == null || secondClickedValue == null ||  firstClickedValue.value == secondClickedValue.value){ // if one or more points are not selected
             label = null;
             return;
         }  
-        double percentDifference = ((Math.max(firstClickedValue.value, secondClickedValue.value) - Math.min(firstClickedValue.value, secondClickedValue.value)) / ((firstClickedValue.value + secondClickedValue.value) / 2)) * 100;
+        PointValue earlier, later;
+        int month1 = monthToNumber(firstClickedValue.month); // 5
+        int month2 = monthToNumber(firstClickedValue.month); //4
+        if(month1  <= month2){
+            earlier = firstClickedValue;
+            later = secondClickedValue;
+        } else {
+            earlier = secondClickedValue;
+            later = firstClickedValue;
+        }
+
+        double percentDifference = ((later.value - earlier.value) / earlier.value) * 100;
         if (firstClickedValue.employee == secondClickedValue.employee && firstClickedValue.expected == false && secondClickedValue.expected == false){ // if two points of the same employee are selected and there both not expected values
-            label = "Percent difference: " + String.format("%.2f", percentDifference);
-        }  else if(firstClickedValue.employee == secondClickedValue.employee && firstClickedValue.month.equals(secondClickedValue.month) && ((firstClickedValue.expected == false && secondClickedValue.expected == true) || (firstClickedValue.expected == true && secondClickedValue.expected == false))){ // same employee, same month, one expected one not expected
-            label = "Percent difference: " + String.format("%.2f", percentDifference);
-        } else if(firstClickedValue.employee != secondClickedValue.employee && firstClickedValue.month.equals(secondClickedValue.month)) { // different employees in the same month
-            // System.out.println("test");
-            if(firstClickedValue.value > secondClickedValue.value){
-                label = firstClickedValue.employee.getName().split(",")[0] + " Performed " + String.format("%.2f", percentDifference) + "% better than " + secondClickedValue.employee.getName().split(",")[0];
+            label = "Difference of: " + String.format("%.2f", percentDifference) + "%";
+        } else if(firstClickedValue.employee == secondClickedValue.employee && firstClickedValue.month.equals(secondClickedValue.month) && ((firstClickedValue.expected == false && secondClickedValue.expected == true) || (firstClickedValue.expected == true && secondClickedValue.expected == false))){ // same employee, same month, one expected one not expected
+            percentDifference = ((Math.max(firstClickedValue.value, secondClickedValue.value) - Math.min(firstClickedValue.value, secondClickedValue.value)) / ((firstClickedValue.value + secondClickedValue.value) / 2)) * 100;
+            if(firstClickedValue.value > secondClickedValue.value && firstClickedValue.expected == true){
+                label = firstClickedValue.employee.getName().split(",")[0] + " Performed -" + String.format("%.2f", percentDifference) + "% under expected "  + firstClickedValue.month;
+            } else if(firstClickedValue.value < secondClickedValue.value && firstClickedValue.expected == false){
+                label = firstClickedValue.employee.getName().split(",")[0] + " Performed -" + String.format("%.2f", percentDifference) + "% under expected "  + firstClickedValue.month;
             } else {
-                label = secondClickedValue.employee.getName().split(",")[0] + " Performed " + String.format("%.2f", percentDifference) + "% better than " + firstClickedValue.employee.getName().split(",")[0];
+                label = firstClickedValue.employee.getName().split(",")[0] + " Performed " + String.format("%.2f", percentDifference) + "% over expected in " + firstClickedValue.month;
             }
         } else {
             label = "Bad Selection";
@@ -101,7 +131,6 @@ public class Graph extends JPanel {
         firstClickedValue = null;
         secondClickedValue = null;
         differenceLabel = label;
-        // repaint();
     }
 
     public void clearEmployees() { // clear all 
@@ -186,7 +215,7 @@ public class Graph extends JPanel {
 
         if (differenceLabel != null && !differenceLabel.isEmpty()) {
             g2.setColor(Color.BLACK);
-            g2.drawString(differenceLabel, ((getWidth() - 2 * PADDING)) / 2, PADDING - 20); // not sure why this isnt in the middle
+            g2.drawString(differenceLabel, (((getWidth() - 2 * PADDING)) / 2) - 40, PADDING - 20); // not sure why this isnt in the middle
         } 
     }
 
@@ -338,10 +367,11 @@ public class Graph extends JPanel {
             Stroke originalStroke = g2.getStroke(); // save original stroke, which is basically currenlty what is dispalyed
             Stroke dashed = new BasicStroke(1.5f,BasicStroke.CAP_BUTT,BasicStroke.JOIN_MITER,10.0f,new float[]{10.0f},0.0f);
             g2.setStroke(dashed); // dashed pattern from chatgpt
-            g2.setColor(Color.darkGray); // all expected numerics are the same color
+            // g2.setColor(Color.darkGray); // all expected numerics are the same color
 
             // For each active employee, draw their expected performance.
             for (Employee employee : activeEmployees) {
+                g2.setColor(employee.getDisplayColor()); 
                 // Get the expected performance values (index 1).
                 double expected  = employee.getExpected();
                 int xStep = (getWidth() - 2 * PADDING) / employee.getMonthlyData().size();
