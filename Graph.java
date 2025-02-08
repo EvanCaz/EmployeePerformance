@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.AbstractMap;
+// import java.util.AbstractMap;
 // import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,11 +11,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Graph extends JPanel {
-    private static final int PADDING = 90; // margins
-    private int yAxisMin = -10; // going to change this so it is dynamic, where the min is rounded to the next lowest 5 and max is rounded to next highest five, so the spread of lines is greatest no matter what
-    private int yAxisMax = 40;
+    private static final int PADDING = 60; // margins
+    private int yAxisMin = -5; // going to change this so it is dynamic, where the min is rounded to the next lowest 5 and max is rounded to next highest five, so the spread of lines is greatest no matter what
+    private int yAxisMax = 30;
     private final int HOVER_THRESHOLD = 5;
-    
+    private String differenceLabel; // this is the varable that is changed to indicate difference
     
     private PointValue firstClickedValue = null; // couldve used a set, so more than two could be selected, but idk why youd want more than 2
     private PointValue secondClickedValue = null;
@@ -69,7 +69,30 @@ public class Graph extends JPanel {
         activeEmployees.addAll(employees);
         repaint();
     }
-    
+
+    // three cases that we want to calculate.
+    // If two points are clicked in same emplyee, cal percent difference
+    // if two points are clicked on same employee, but one is expected and one is normal, calculate how far off they
+    // if two points are clicked on different employee but on the same month, calculate how much better one performed then the other
+    private void calDifference(){ 
+        String label = null;
+        if(firstClickedValue == null || secondClickedValue == null){ // if one or more points are not selected
+            label =  "Difference: None";
+        } else if (firstClickedValue.employee == secondClickedValue.employee && firstClickedValue.expected == secondClickedValue.expected){ // if two points of the same employee are selected and there both not expected values
+            double percentDifference = Math.abs(((Math.max(firstClickedValue.value, secondClickedValue.value) - Math.min(firstClickedValue.value, secondClickedValue.value)) / ((firstClickedValue.value + secondClickedValue.value) / 2))) * 100;
+            label = "Percent difference: " + String.format("%.2f", percentDifference);
+            System.out.println(label);
+            firstClickedValue = null;
+            secondClickedValue = null;
+        }
+        differenceLabel = label;
+        repaint();
+    }
+
+    public String getDifferenceLabel(){
+        return differenceLabel;
+    }
+
     public void clearEmployees() { // clear all 
         activeEmployees.clear();
         secondClickedValue = null;
@@ -144,7 +167,7 @@ public class Graph extends JPanel {
         if (showExpected) {
             displayExpected(g2, true);
         }
-
+        calDifference();
         drawHoverTooltip(g2);
         highLightPoint(g2);
     }
@@ -312,7 +335,7 @@ public class Graph extends JPanel {
                         int x = PADDING + (i * xStep) + (xStep / 2);
                         int y = mapY(expected);
 
-                        dataPoints.add(new PointValue(new Point(x, y), expected, employee)); // for hovering
+                        dataPoints.add(new PointValue(new Point(x, y), expected, employee, true)); // for hovering
 
                         // draw the circle just as we do with actual performance
                         g2.fillOval(x - 3, y - 3, 6, 6);
@@ -348,7 +371,7 @@ public class Graph extends JPanel {
                 int x = PADDING + (i * xStep) + (xStep / 2); // calculate again bruh, can be more efficent
                 int y = mapY(value); // convert to pixels, play around wiht value because i think the formatting of strings and dots makes the dots appear vertically skewed downward
                 // i had a minus ten from above, that was causing everything to be skewed upwards, this fixes that issue, need to change jar
-                dataPoints.add(new PointValue(new Point(x, y), value, employee)); // save for hover
+                dataPoints.add(new PointValue(new Point(x, y), value, employee, false)); // save for hover
         
                 g2.fillOval(x - 3, y - 3, 6, 6); // draw it, chose random values until it looked like a point
         
@@ -375,8 +398,10 @@ public class Graph extends JPanel {
         Point point;
         double value;
         Employee employee;
+        boolean expected;
     
-        PointValue(Point point, double value, Employee employee) { // this goes into a list that is dataPoints for hovering
+        PointValue(Point point, double value, Employee employee, boolean expected) { // this goes into a list that is dataPoints for hovering
+            this.expected = expected;
             this.point = point;
             this.value = value;
             this.employee = employee; // might also change this so it contains the color, then when you hover the name is in the same color

@@ -50,7 +50,7 @@ public class main {
         frame.setLayout(new BorderLayout()); // how I plane to arrange everything inside
     
         JPanel controlPanelNorth = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10)); // area for all the buttons and drop down, "controlPanelNorth" is created and flowlayout means the stuff is in a row
-        // JPanel controlPanelSouth = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10)); // for extra buttons
+        // JPanel controlPanelSouth = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5)); // for extra buttons
         controlPanelNorth.setBackground(Color.LIGHT_GRAY);
         // controlPanelSouth.setBackground(Color.LIGHT_GRAY);
         
@@ -62,31 +62,39 @@ public class main {
         employeeDropdown.setSelectedIndex(-1); // initial selection is none
         
         // JButton yAxisButton = new JButton("Change Range"); // change the range of the graph button
-        
+        // JButton calDifference = new JButton("Calculate Difference");
         JButton displayAllButton = new JButton("Display All"); // button defintions for addition control buttons
         JButton clearAllButton = new JButton("Clear All");
         JToggleButton toggleExpectedPerformance = new JToggleButton("Expected Performance Off");
     
         controlPanelNorth.add(employeeDropdown); // adding all of these to the flowlayout jpanel
-        // controlPanelNorth.add(yAxisButton);
+        // controlPanelSouth.add(calDifference);
         controlPanelNorth.add(displayAllButton);
         controlPanelNorth.add(clearAllButton);
         controlPanelNorth.add(toggleExpectedPerformance);
         
-        JLabel activeEmployeesLabel = new JLabel("Active Employees: None"); // default selection is none, this is position right below controlPanelNorth
+        JLabel activeEmployeesLabel = new JLabel("Active Employees: None");
+        JLabel differenceLabel = new JLabel("Difference: None");
         activeEmployeesLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
         activeEmployeesLabel.setBackground(Color.LIGHT_GRAY);
+
         Graph graph = new Graph(); // creating graph object, constructor requires nothing but it used to and forhot to change it earlier
     
-        JPanel graphContainer = new JPanel(new BorderLayout()); // another jpanel to containt it
-        graphContainer.add(activeEmployeesLabel, BorderLayout.NORTH); 
+        JPanel labelsPanel = new JPanel();
+        labelsPanel.setLayout(new BoxLayout(labelsPanel, BoxLayout.Y_AXIS));
+        labelsPanel.setBackground(Color.LIGHT_GRAY);
+        labelsPanel.add(activeEmployeesLabel);
+        labelsPanel.add(differenceLabel);
+
+        JPanel graphContainer = new JPanel(new BorderLayout());
+        graphContainer.add(labelsPanel, BorderLayout.NORTH); 
         graphContainer.add(graph, BorderLayout.CENTER);
-        graphContainer.setBackground(Color.LIGHT_GRAY); 
+        graphContainer.setBackground(Color.LIGHT_GRAY);  
     
         frame.add(controlPanelNorth, BorderLayout.NORTH); // the controlPanelNorth is added to the top of this new jpanel
         frame.add(graphContainer, BorderLayout.CENTER); // the graph is added to the center, but realisticlay the everything else besides north
         // frame.add(controlPanelSouth, BorderLayout.SOUTH);
-        Runnable updateLabel = () -> updateActiveEmployeesLabel(activeEmployeesLabel, graph); // chatgpt helped, idk what runnable is but this is a listener to update active employees
+        Runnable updateLabel = () -> {updateActiveEmployeesLabel(activeEmployeesLabel, graph); updateDifferenceLabel(differenceLabel, graph); }; // chatgpt helped, idk what runnable is but this is a listener to update active employees
     
         // listenrs
     
@@ -107,7 +115,7 @@ public class main {
                 employeeDropdown.setSelectedIndex(-1);
             } 
         });
-        
+
         displayAllButton.addActionListener(e -> {
             graph.setEmployees(employees);
             updateLabel.run();
@@ -134,6 +142,16 @@ public class main {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true); //swing stuff
     }
+
+    private static void updateDifferenceLabel(JLabel difference, Graph graph) {
+        String status = graph.getDifferenceLabel();
+        if (status.isEmpty()) {
+            difference.setText("Difference: None");
+        } else {
+            difference.setText(status);
+        }
+    }
+
 
     private static void updateActiveEmployeesLabel(JLabel label, Graph graph) { // accepts the label that contains active employees
         List<Employee> active = graph.getActiveEmployees();
