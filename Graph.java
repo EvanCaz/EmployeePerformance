@@ -61,40 +61,56 @@ public class Graph extends JPanel {
         } else {
             activeEmployees.add(employee);
         }
+        firstClickedValue = null;
+        secondClickedValue = null;
         repaint(); // change the graph again
     }
     
     public void setEmployees(List<Employee> employees) { // refresh and start over, hence the clear, add all, and repaint, so display all
         activeEmployees.clear();
         activeEmployees.addAll(employees);
+        differenceLabel = null;
         repaint();
     }
 
     // three cases that we want to calculate.
     // If two points are clicked in same emplyee, cal percent difference
-    // if two points are clicked on same employee, but one is expected and one is normal, calculate how far off they
+    // if two points are clicked on same employee, but one is expected and one is normal and are the same month, calculate how far off they
     // if two points are clicked on different employee but on the same month, calculate how much better one performed then the other
     private void calDifference(){ 
-        String label = null;
+        String label = differenceLabel;
         if(firstClickedValue == null || secondClickedValue == null){ // if one or more points are not selected
-            label =  "Difference: None";
-        } else if (firstClickedValue.employee == secondClickedValue.employee && firstClickedValue.expected == secondClickedValue.expected){ // if two points of the same employee are selected and there both not expected values
-            double percentDifference = Math.abs(((Math.max(firstClickedValue.value, secondClickedValue.value) - Math.min(firstClickedValue.value, secondClickedValue.value)) / ((firstClickedValue.value + secondClickedValue.value) / 2))) * 100;
+            label = null;
+            return;
+        }  
+        double percentDifference = ((Math.max(firstClickedValue.value, secondClickedValue.value) - Math.min(firstClickedValue.value, secondClickedValue.value)) / ((firstClickedValue.value + secondClickedValue.value) / 2)) * 100;
+        if (firstClickedValue.employee == secondClickedValue.employee && firstClickedValue.expected == false && secondClickedValue.expected == false){ // if two points of the same employee are selected and there both not expected values
             label = "Percent difference: " + String.format("%.2f", percentDifference);
-            System.out.println(label);
-            firstClickedValue = null;
-            secondClickedValue = null;
+        }  
+        if(firstClickedValue.employee == secondClickedValue.employee && firstClickedValue.month.equals(secondClickedValue.month) && ((firstClickedValue.expected == false && secondClickedValue.expected == true) || (firstClickedValue.expected == true && secondClickedValue.expected == false))){ // same employee, same month, one expected one not expected
+            if(firstClickedValue.expected == true && firstClickedValue.value > secondClickedValue.value){
+                label = "Perform " + String.format("%.2f", percentDifference) + "% Over";
+            } else {
+                label = "Performed " + String.format("%.2f", percentDifference) + "% Under";
+            }
+        }  
+        if(firstClickedValue.employee != secondClickedValue.employee && firstClickedValue.month.equals(secondClickedValue.month)) { // different employees in the same month
+            System.out.println("test");
+            if(firstClickedValue.value > secondClickedValue.value){
+                label = firstClickedValue.employee.getName().split(",")[0] + ", Performed " + String.format("%.2f", percentDifference) + "% better than " + secondClickedValue.employee.getName().split(",")[0];
+            } else {
+                label = secondClickedValue.employee.getName().split(",")[0] + ", Performed " + String.format("%.2f", percentDifference) + "% better than " + firstClickedValue.employee.getName().split(",")[0];
+            }
         }
+        firstClickedValue = null;
+        secondClickedValue = null;
         differenceLabel = label;
-        repaint();
-    }
-
-    public String getDifferenceLabel(){
-        return differenceLabel;
+        // repaint();
     }
 
     public void clearEmployees() { // clear all 
         activeEmployees.clear();
+        differenceLabel = null;
         secondClickedValue = null;
         firstClickedValue = null;
         repaint();
@@ -167,9 +183,16 @@ public class Graph extends JPanel {
         if (showExpected) {
             displayExpected(g2, true);
         }
-        calDifference();
+
+        calDifference(); // changes the variable for below to alter
         drawHoverTooltip(g2);
         highLightPoint(g2);
+
+        if (differenceLabel != null && !differenceLabel.isEmpty()) {
+            g2.setColor(Color.BLACK);
+            // g2.setFont(new Font("SansSerif", Font.PLAIN, 14)); // googled this font
+            g2.drawString(differenceLabel, (getWidth() - PADDING) / 2, PADDING - 20); // not sure why this isnt in the middle
+        }
     }
 
     private void highLightPoint(Graphics2D g2){
@@ -330,12 +353,14 @@ public class Graph extends JPanel {
                 int prevX = -1;
                 int prevY = -1;
 
+                List<Map.Entry<String, Double>> entries = employee.getMonthlyData().entrySet().stream().collect(Collectors.toList()); // for month key for calculation
+
                 for (int i = 0; i < employee.getMonthlyData().size(); i++) {
                     if (expected != -100.05) {
                         int x = PADDING + (i * xStep) + (xStep / 2);
                         int y = mapY(expected);
 
-                        dataPoints.add(new PointValue(new Point(x, y), expected, employee, true)); // for hovering
+                        dataPoints.add(new PointValue(new Point(x, y), expected, employee, true, entries.get(i).getKey())); // for hovering
 
                         // draw the circle just as we do with actual performance
                         g2.fillOval(x - 3, y - 3, 6, 6);
@@ -371,7 +396,7 @@ public class Graph extends JPanel {
                 int x = PADDING + (i * xStep) + (xStep / 2); // calculate again bruh, can be more efficent
                 int y = mapY(value); // convert to pixels, play around wiht value because i think the formatting of strings and dots makes the dots appear vertically skewed downward
                 // i had a minus ten from above, that was causing everything to be skewed upwards, this fixes that issue, need to change jar
-                dataPoints.add(new PointValue(new Point(x, y), value, employee, false)); // save for hover
+                dataPoints.add(new PointValue(new Point(x, y), value, employee, false, entries.get(i).getKey())); // save for hover
         
                 g2.fillOval(x - 3, y - 3, 6, 6); // draw it, chose random values until it looked like a point
         
@@ -399,8 +424,10 @@ public class Graph extends JPanel {
         double value;
         Employee employee;
         boolean expected;
+        String month;
     
-        PointValue(Point point, double value, Employee employee, boolean expected) { // this goes into a list that is dataPoints for hovering
+        PointValue(Point point, double value, Employee employee, boolean expected, String month) { // this goes into a list that is dataPoints for hovering
+            this.month = month;
             this.expected = expected;
             this.point = point;
             this.value = value;

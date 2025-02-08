@@ -73,28 +73,22 @@ public class main {
         controlPanelNorth.add(clearAllButton);
         controlPanelNorth.add(toggleExpectedPerformance);
         
-        JLabel activeEmployeesLabel = new JLabel("Active Employees: None");
-        JLabel differenceLabel = new JLabel("Difference: None");
+        JLabel activeEmployeesLabel = new JLabel("Active Employees: None"); // default selection is none, this is position right below controlPanelNorth
+        // JLabel difference = new JLabel("Difference: None");
         activeEmployeesLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
         activeEmployeesLabel.setBackground(Color.LIGHT_GRAY);
-
         Graph graph = new Graph(); // creating graph object, constructor requires nothing but it used to and forhot to change it earlier
     
-        JPanel labelsPanel = new JPanel();
-        labelsPanel.setLayout(new BoxLayout(labelsPanel, BoxLayout.Y_AXIS));
-        labelsPanel.setBackground(Color.LIGHT_GRAY);
-        labelsPanel.add(activeEmployeesLabel);
-        labelsPanel.add(differenceLabel);
-
-        JPanel graphContainer = new JPanel(new BorderLayout());
-        graphContainer.add(labelsPanel, BorderLayout.NORTH); 
+        JPanel graphContainer = new JPanel(new BorderLayout()); // another jpanel to containt it
+        graphContainer.add(activeEmployeesLabel, BorderLayout.NORTH); 
+        // graphContainer.add(difference, BorderLayout.SOUTH);
         graphContainer.add(graph, BorderLayout.CENTER);
-        graphContainer.setBackground(Color.LIGHT_GRAY);  
+        graphContainer.setBackground(Color.LIGHT_GRAY); 
     
         frame.add(controlPanelNorth, BorderLayout.NORTH); // the controlPanelNorth is added to the top of this new jpanel
         frame.add(graphContainer, BorderLayout.CENTER); // the graph is added to the center, but realisticlay the everything else besides north
         // frame.add(controlPanelSouth, BorderLayout.SOUTH);
-        Runnable updateLabel = () -> {updateActiveEmployeesLabel(activeEmployeesLabel, graph); updateDifferenceLabel(differenceLabel, graph); }; // chatgpt helped, idk what runnable is but this is a listener to update active employees
+        Runnable updateLabel = () -> updateActiveEmployeesLabel(activeEmployeesLabel, graph); // chatgpt helped, idk what runnable is but this is a listener to update active employees
     
         // listenrs
     
@@ -143,15 +137,14 @@ public class main {
         frame.setVisible(true); //swing stuff
     }
 
-    private static void updateDifferenceLabel(JLabel difference, Graph graph) {
-        String status = graph.getDifferenceLabel();
-        if (status.isEmpty()) {
-            difference.setText("Difference: None");
-        } else {
-            difference.setText(status);
-        }
-    }
-
+    // private static void updateDifferenceLabel(JLabel difference, Graph graph){
+    //     String status = graph.getDifferenceLabel();
+    //     if (status.isEmpty()) {
+    //         difference.setText("Difference: None"); // default to none
+    //     } else {
+    //         difference.setText((status));
+    //     }
+    // }
 
     private static void updateActiveEmployeesLabel(JLabel label, Graph graph) { // accepts the label that contains active employees
         List<Employee> active = graph.getActiveEmployees();
