@@ -86,21 +86,17 @@ public class Graph extends JPanel {
         double percentDifference = ((Math.max(firstClickedValue.value, secondClickedValue.value) - Math.min(firstClickedValue.value, secondClickedValue.value)) / ((firstClickedValue.value + secondClickedValue.value) / 2)) * 100;
         if (firstClickedValue.employee == secondClickedValue.employee && firstClickedValue.expected == false && secondClickedValue.expected == false){ // if two points of the same employee are selected and there both not expected values
             label = "Percent difference: " + String.format("%.2f", percentDifference);
-        }  
-        if(firstClickedValue.employee == secondClickedValue.employee && firstClickedValue.month.equals(secondClickedValue.month) && ((firstClickedValue.expected == false && secondClickedValue.expected == true) || (firstClickedValue.expected == true && secondClickedValue.expected == false))){ // same employee, same month, one expected one not expected
-            if(firstClickedValue.expected == true && firstClickedValue.value > secondClickedValue.value){
-                label = "Perform " + String.format("%.2f", percentDifference) + "% Over";
-            } else {
-                label = "Performed " + String.format("%.2f", percentDifference) + "% Under";
-            }
-        }  
-        if(firstClickedValue.employee != secondClickedValue.employee && firstClickedValue.month.equals(secondClickedValue.month)) { // different employees in the same month
-            System.out.println("test");
+        }  else if(firstClickedValue.employee == secondClickedValue.employee && firstClickedValue.month.equals(secondClickedValue.month) && ((firstClickedValue.expected == false && secondClickedValue.expected == true) || (firstClickedValue.expected == true && secondClickedValue.expected == false))){ // same employee, same month, one expected one not expected
+            label = "Percent difference: " + String.format("%.2f", percentDifference);
+        } else if(firstClickedValue.employee != secondClickedValue.employee && firstClickedValue.month.equals(secondClickedValue.month)) { // different employees in the same month
+            // System.out.println("test");
             if(firstClickedValue.value > secondClickedValue.value){
-                label = firstClickedValue.employee.getName().split(",")[0] + ", Performed " + String.format("%.2f", percentDifference) + "% better than " + secondClickedValue.employee.getName().split(",")[0];
+                label = firstClickedValue.employee.getName().split(",")[0] + " Performed " + String.format("%.2f", percentDifference) + "% better than " + secondClickedValue.employee.getName().split(",")[0];
             } else {
-                label = secondClickedValue.employee.getName().split(",")[0] + ", Performed " + String.format("%.2f", percentDifference) + "% better than " + firstClickedValue.employee.getName().split(",")[0];
+                label = secondClickedValue.employee.getName().split(",")[0] + " Performed " + String.format("%.2f", percentDifference) + "% better than " + firstClickedValue.employee.getName().split(",")[0];
             }
+        } else {
+            label = "Bad Selection";
         }
         firstClickedValue = null;
         secondClickedValue = null;
@@ -190,9 +186,8 @@ public class Graph extends JPanel {
 
         if (differenceLabel != null && !differenceLabel.isEmpty()) {
             g2.setColor(Color.BLACK);
-            // g2.setFont(new Font("SansSerif", Font.PLAIN, 14)); // googled this font
-            g2.drawString(differenceLabel, (getWidth() - PADDING) / 2, PADDING - 20); // not sure why this isnt in the middle
-        }
+            g2.drawString(differenceLabel, ((getWidth() - 2 * PADDING)) / 2, PADDING - 20); // not sure why this isnt in the middle
+        } 
     }
 
     private void highLightPoint(Graphics2D g2){
